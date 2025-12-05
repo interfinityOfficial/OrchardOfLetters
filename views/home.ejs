@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="icon"
+      href="/assets/icon.png"
+      type="image/x-icon"
+      media="(prefers-color-scheme: light)"
+    />
+    <link
+      rel="icon"
+      href="/assets/icon_dark.png"
+      type="image/x-icon"
+      media="(prefers-color-scheme: dark)"
+    />
+    <link rel="stylesheet" href="/styles/main.css" />
+    <title>Orchard of Letters</title>
+  </head>
+  <body class="page-home">
+    <canvas id="home-canvas"></canvas>
+    <div class="logo">
+      <div class="logo-column">
+        <div class="logo-letter">O</div>
+        <div class="logo-letter">R</div>
+        <div class="logo-letter">C</div>
+        <div class="logo-letter">H</div>
+        <div class="logo-letter">A</div>
+        <div class="logo-letter">R</div>
+        <div class="logo-letter">D</div>
+      </div>
+
+      <div class="logo-column">
+        <div class="logo-letter">O</div>
+        <div class="logo-letter">F</div>
+        <div class="logo-letter"></div>
+        <div class="logo-letter">L</div>
+        <div class="logo-letter">E</div>
+        <div class="logo-letter">T</div>
+        <div class="logo-letter">T</div>
+        <div class="logo-letter">E</div>
+        <div class="logo-letter">R</div>
+        <div class="logo-letter">S</div>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <% if (userId) { %>
+      <a href="/plant/" class="nav-button">
+        <div class="nav-button-letter">P</div>
+        <div class="nav-button-letter">L</div>
+        <div class="nav-button-letter">A</div>
+        <div class="nav-button-letter">N</div>
+        <div class="nav-button-letter">T</div>
+      </a>
+      <a href="/about/" class="nav-button">
+        <div class="nav-button-letter">A</div>
+        <div class="nav-button-letter">B</div>
+        <div class="nav-button-letter">O</div>
+        <div class="nav-button-letter">U</div>
+        <div class="nav-button-letter">T</div>
+      </a>
+      <button class="nav-button" id="logout-button">
+        <div class="nav-button-letter">L</div>
+        <div class="nav-button-letter">O</div>
+        <div class="nav-button-letter">G</div>
+        <div class="nav-button-letter">O</div>
+        <div class="nav-button-letter">U</div>
+        <div class="nav-button-letter">T</div>
+      </button>
+      <% } else { %>
+      <a href="/about/" class="nav-button">
+        <div class="nav-button-letter">A</div>
+        <div class="nav-button-letter">B</div>
+        <div class="nav-button-letter">O</div>
+        <div class="nav-button-letter">U</div>
+        <div class="nav-button-letter">T</div>
+      </a>
+      <a href="/login/" class="nav-button">
+        <div class="nav-button-letter">L</div>
+        <div class="nav-button-letter">O</div>
+        <div class="nav-button-letter">G</div>
+        <div class="nav-button-letter">I</div>
+        <div class="nav-button-letter">N</div>
+      </a>
+      <a href="/signup/" class="nav-button">
+        <div class="nav-button-letter">S</div>
+        <div class="nav-button-letter">I</div>
+        <div class="nav-button-letter">G</div>
+        <div class="nav-button-letter">N</div>
+        <div class="nav-button-letter">U</div>
+        <div class="nav-button-letter">P</div>
+      </a>
+      <% } %>
+    </div>
+    <div class="minimap" id="minimap"></div>
+    <div class="alert">
+      <div class="alert-content">
+        <p>Confirm Logout?</p>
+      </div>
+      <div class="alert-buttons">
+        <button
+          class="alert-button alert-button-secondary"
+          id="alert-button-secondary"
+        >
+          Cancel
+        </button>
+        <button class="alert-button" id="alert-button-primary">Logout</button>
+      </div>
+    </div>
+
+    <script>
+      window.PLANTS_DATA = <%- plants %>;
+    </script>
+    <script src="/lib/gsap.min.js"></script>
+    <script src="/home.js"></script>
+    <script src="/alert.js"></script>
+  </body>
+</html>

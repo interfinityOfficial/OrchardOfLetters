@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="icon"
+      href="/assets/icon.png"
+      type="image/x-icon"
+      media="(prefers-color-scheme: light)"
+    />
+    <link
+      rel="icon"
+      href="/assets/icon_dark.png"
+      type="image/x-icon"
+      media="(prefers-color-scheme: dark)"
+    />
+    <link rel="stylesheet" href="/styles/main.css" />
+    <script src="/lib/simplewebauthn.umd.min.js"></script>
+    <title>Orchard of Letters - Sign Up</title>
+  </head>
+  <body class="page-login">
+    <div class="logo">
+      <div class="logo-column">
+        <div class="logo-letter">S</div>
+        <div class="logo-letter">I</div>
+        <div class="logo-letter">G</div>
+        <div class="logo-letter">N</div>
+        <div class="logo-letter">U</div>
+        <div class="logo-letter">P</div>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <a href="/" class="nav-button">
+        <div class="nav-button-letter">O</div>
+        <div class="nav-button-letter">R</div>
+        <div class="nav-button-letter">C</div>
+        <div class="nav-button-letter">H</div>
+        <div class="nav-button-letter">A</div>
+        <div class="nav-button-letter">R</div>
+        <div class="nav-button-letter">D</div>
+      </a>
+      <a href="/login/" class="nav-button">
+        <div class="nav-button-letter">L</div>
+        <div class="nav-button-letter">O</div>
+        <div class="nav-button-letter">G</div>
+        <div class="nav-button-letter">I</div>
+        <div class="nav-button-letter">N</div>
+      </a>
+    </div>
+    <main>
+      <div class="login-container">
+        <div class="error-text-container">
+          <div class="error-text" id="error-text">AN ERROR OCCURRED</div>
+        </div>
+        <div class="username-container">
+          <input
+            type="text"
+            placeholder="PICK A USERNAME"
+            class="username-input"
+            id="username-input"
+            maxlength="20"
+          />
+        </div>
+        <button class="passkey-button" id="signup-button">
+          <span>CONTINUE WITH PASSKEY</span>
+          <svg
+            class="passkey-icon"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 50 70"
+          >
+            <g id="Layer_1-2" data-name="Layer_1">
+              <path
+                d="M40,0H0v30h20v40h0s20,0,20,0v-20h-10v-20h20V0h-10ZM40,20H10v-10h30v10Z"
+              />
+            </g>
+          </svg>
+        </button>
+      </div>
+    </main>
+
+    <script src="/signup.js"></script>
+  </body>
+</html>

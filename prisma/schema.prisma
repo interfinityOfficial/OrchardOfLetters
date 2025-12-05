@@ -1,0 +1,79 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas  = ["final"]
+}
+
+model User {
+  id          String       @id @default(uuid())
+  username    String       @unique
+  isAdmin     Boolean      @default(false)
+  credentials Credential[]
+
+  plant       Plant?
+
+  @@schema("final")
+}
+
+model Credential {
+  id           String   @id @default(uuid())
+  credentialId String   @unique
+  publicKey    String
+  counter      Int
+  transports   String?
+  userId       String
+  user         User      @relation(fields: [userId], references: [id])
+  createdAt    DateTime  @default(now())
+
+  @@schema("final")
+}
+
+model Plant {
+  id        String      @id @default(uuid())
+  userId    String      @unique
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tiles     Tile[]
+  words     PlantWord[]
+  updatedAt DateTime    @updatedAt
+  createdAt DateTime    @default(now())
+
+  seed      String?
+
+  @@schema("final")
+}
+
+model Tile {
+  id       String  @id @default(uuid())
+  plantId  String
+  plant    Plant   @relation(fields: [plantId], references: [id], onDelete: Cascade)
+  x        Int
+  y        Int
+  letter   String  @db.Char(1)
+  isSeed   Boolean @default(false)
+  blooming Boolean @default(false)
+
+  @@unique([plantId, x, y])  // One tile per coordinate
+  @@index([plantId])         // Fast lookup of all tiles for a plant
+  @@schema("final")
+}
+
+model PlantWord {
+  id        String   @id @default(uuid())
+  plantId   String
+  plant     Plant    @relation(fields: [plantId], references: [id], onDelete: Cascade)
+  word      String
+  createdAt DateTime @default(now())
+
+  @@unique([plantId, word])  // No duplicate words per plant
+  @@index([plantId])         // Fast lookup of words for a plant
+  @@schema("final")
+}

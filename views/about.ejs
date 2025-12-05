@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="icon"
+      href="/assets/icon.png"
+      type="image/x-icon"
+      media="(prefers-color-scheme: light)"
+    />
+    <link
+      rel="icon"
+      href="/assets/icon_dark.png"
+      type="image/x-icon"
+      media="(prefers-color-scheme: dark)"
+    />
+    <link rel="stylesheet" href="/styles/main.css" />
+    <script src="/lib/simplewebauthn.umd.min.js"></script>
+    <title>Orchard of Letters - About</title>
+  </head>
+  <body class="page-about">
+    <div class="logo">
+      <div class="logo-column">
+        <div class="logo-letter">A</div>
+        <div class="logo-letter">B</div>
+        <div class="logo-letter">O</div>
+        <div class="logo-letter">U</div>
+        <div class="logo-letter">T</div>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <a href="/" class="nav-button">
+        <div class="nav-button-letter">O</div>
+        <div class="nav-button-letter">R</div>
+        <div class="nav-button-letter">C</div>
+        <div class="nav-button-letter">H</div>
+        <div class="nav-button-letter">A</div>
+        <div class="nav-button-letter">R</div>
+        <div class="nav-button-letter">D</div>
+      </a>
+      <% if (userId) { %>
+      <a href="/plant/" class="nav-button">
+        <div class="nav-button-letter">P</div>
+        <div class="nav-button-letter">L</div>
+        <div class="nav-button-letter">A</div>
+        <div class="nav-button-letter">N</div>
+        <div class="nav-button-letter">T</div>
+      </a>
+      <button class="nav-button" id="logout-button">
+        <div class="nav-button-letter">L</div>
+        <div class="nav-button-letter">O</div>
+        <div class="nav-button-letter">G</div>
+        <div class="nav-button-letter">O</div>
+        <div class="nav-button-letter">U</div>
+        <div class="nav-button-letter">T</div>
+      </button>
+      <% } %>
+    </div>
+    <main>
+      <div class="about-container">
+        <span>
+          The Internet is fast, loud, and fleeting. The Orchard of Letters is
+          the opposite. It is a place to stay.<br /><br />
+          Here, words are not content to be consumed; they are seeds to be
+          planted and branches to be grown.<br /><br />
+          We do not type to shout over one another. We type to build upward,
+          creating a shared horizon of individual stories.<br /><br />
+          Plant your seed. Tend your plot. Watch it bloom.<br /><br />
+          Created by Charles Zhang. Check out my blog at
+          <a href="https://inthecreat.ing">inthecreat.ing</a>
+        </span>
+      </div>
+    </main>
+    <div class="alert">
+      <div class="alert-content">
+        <p>Confirm Logout?</p>
+      </div>
+      <div class="alert-buttons">
+        <button
+          class="alert-button alert-button-secondary"
+          id="alert-button-secondary"
+        >
+          Cancel
+        </button>
+        <button class="alert-button" id="alert-button-primary">Logout</button>
+      </div>
+    </div>
+
+    <script src="/alert.js"></script>
+  </body>
+</html>

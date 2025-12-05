@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="icon"
+      href="/assets/icon.png"
+      type="image/x-icon"
+      media="(prefers-color-scheme: light)"
+    />
+    <link
+      rel="icon"
+      href="/assets/icon_dark.png"
+      type="image/x-icon"
+      media="(prefers-color-scheme: dark)"
+    />
+    <link rel="stylesheet" href="/styles/main.css" />
+    <title>Plant</title>
+  </head>
+  <body class="page-plant">
+    <canvas id="plant-canvas"></canvas>
+
+    <div class="seed-input-ui hidden" id="seed-input-ui">
+      <div class="seed-text-column" id="seed-title">
+        <div class="seed-text-letter">C</div>
+        <div class="seed-text-letter">H</div>
+        <div class="seed-text-letter">O</div>
+        <div class="seed-text-letter">O</div>
+        <div class="seed-text-letter">S</div>
+        <div class="seed-text-letter">E</div>
+        <div class="seed-text-letter"></div>
+        <div class="seed-text-letter">Y</div>
+        <div class="seed-text-letter">O</div>
+        <div class="seed-text-letter">U</div>
+        <div class="seed-text-letter">R</div>
+        <div class="seed-text-letter"></div>
+        <div class="seed-text-letter">S</div>
+        <div class="seed-text-letter">E</div>
+        <div class="seed-text-letter">E</div>
+        <div class="seed-text-letter">D</div>
+      </div>
+      <div class="seed-text-column seed-hint" id="seed-hint"></div>
+    </div>
+
+    <div class="nav-buttons">
+      <a href="/" class="nav-button">
+        <div class="nav-button-letter">O</div>
+        <div class="nav-button-letter">R</div>
+        <div class="nav-button-letter">C</div>
+        <div class="nav-button-letter">H</div>
+        <div class="nav-button-letter">A</div>
+        <div class="nav-button-letter">R</div>
+        <div class="nav-button-letter">D</div>
+      </a>
+      <% if (userId) { %>
+      <button class="nav-button" id="logout-button">
+        <div class="nav-button-letter">L</div>
+        <div class="nav-button-letter">O</div>
+        <div class="nav-button-letter">G</div>
+        <div class="nav-button-letter">O</div>
+        <div class="nav-button-letter">U</div>
+        <div class="nav-button-letter">T</div>
+      </button>
+      <% } %>
+    </div>
+    <div class="alert">
+      <div class="alert-content">
+        <p>Confirm Logout?</p>
+      </div>
+      <div class="alert-buttons">
+        <button
+          class="alert-button alert-button-secondary"
+          id="alert-button-secondary"
+        >
+          Cancel
+        </button>
+        <button class="alert-button" id="alert-button-primary">Logout</button>
+      </div>
+    </div>
+
+    <script>
+      // Server-rendered initial data
+      window.PLANT_DATA = {
+        plantId: "<%= plantId %>",
+        username: "<%= username %>",
+        isOwner: <%= isOwner %>,
+        canEdit: <%= canEdit %>,
+        seed: "<%= seed %>",
+        tiles: <%- tiles %>,
+        words: <%- words %>
+      };
+    </script>
+    <script src="/lib/socket.io.min.js"></script>
+    <script src="/lib/gsap.min.js"></script>
+    <script src="/websocket.js"></script>
+    <script src="/plant.js"></script>
+    <script src="/growth.js"></script>
+    <script src="/alert.js"></script>
+  </body>
+</html>
