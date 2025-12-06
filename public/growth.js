@@ -32,7 +32,7 @@ function getSearchInterval() {
     const progress = (tileCount - MIN_TILES_FOR_SCALING) / (MAX_TILES_FOR_SCALING - MIN_TILES_FOR_SCALING);
     const interval = MIN_SEARCH_INTERVAL + progress * (MAX_SEARCH_INTERVAL - MIN_SEARCH_INTERVAL);
 
-    console.log(`Tree has ${tileCount} tiles, next word in ${(interval / 1000).toFixed(1)}s`);
+    // console.log(`Tree has ${tileCount} tiles, next word in ${(interval / 1000).toFixed(1)}s`);
     return interval;
 }
 
@@ -60,7 +60,7 @@ async function loadGrowthDictionary() {
         const words = text.split('\n').map(w => w.trim().toUpperCase()).filter(w => w.length > 3);
         growthWords = new Set(words);
         growthWordsLoaded = true;
-        console.log(`Growth dictionary loaded: ${growthWords.size} words from inquirer_wordlist.txt`);
+        // console.log(`Growth dictionary loaded: ${growthWords.size} words from inquirer_wordlist.txt`);
     } catch (error) {
         console.error('Failed to load growth dictionary:', error);
         // Fallback to validWords if inquirer_wordlist.txt fails
@@ -93,7 +93,7 @@ async function loadSemanticClusters() {
         }
 
         clustersLoaded = true;
-        console.log(`Semantic clusters loaded: ${Object.keys(wordClusters).length} unique words across ${Object.keys(categoryData).length} categories (${totalWords} total assignments)`);
+        // console.log(`Semantic clusters loaded: ${Object.keys(wordClusters).length} unique words across ${Object.keys(categoryData).length} categories (${totalWords} total assignments)`);
     } catch (error) {
         console.error('Failed to load semantic clusters:', error);
         wordClusters = null;
@@ -237,7 +237,7 @@ async function buildWordIndex() {
     if (growthWords.size === 0) return;
 
     indexBuildInProgress = true;
-    console.log('Building growth word index...');
+    // console.log('Building growth word index...');
     const startTime = performance.now();
 
     const wordsIterator = growthWords.values();
@@ -260,7 +260,7 @@ async function buildWordIndex() {
                 }
                 indexBuilt = true;
                 indexBuildInProgress = false;
-                console.log(`Word index built in ${(performance.now() - startTime).toFixed(1)}ms`);
+                // console.log(`Word index built in ${(performance.now() - startTime).toFixed(1)}ms`);
                 // Now that index is ready, start growth if it was requested
                 if (growthRequested) {
                     startGrowth();
@@ -302,7 +302,7 @@ function startGrowth() {
     isGrowing = true;
     // Start with search interval (looking for first word)
     scheduleNextStep(getSearchInterval());
-    console.log('Auto-growth started');
+    // console.log('Auto-growth started');
 }
 
 // Expose startGrowth globally so plant.js can call it when ready
@@ -343,7 +343,7 @@ function stopGrowth() {
     }
     // Clear word usage tracking
     wordUsageCount.clear();
-    console.log('Auto-growth stopped');
+    // console.log('Auto-growth stopped');
 }
 
 // Reschedule growth based on current tile count (call when tiles are removed)
@@ -352,7 +352,7 @@ function rescheduleGrowth() {
 
     // If currently building a word, don't interrupt - let it finish
     if (currentTarget) {
-        console.log('Tiles removed but word in progress, will reschedule after completion');
+        // console.log('Tiles removed but word in progress, will reschedule after completion');
         return;
     }
 
@@ -363,7 +363,7 @@ function rescheduleGrowth() {
     }
 
     const newInterval = getSearchInterval();
-    console.log(`Tiles removed - rescheduling growth (${grid.size} tiles, next search in ${(newInterval / 1000).toFixed(1)}s)`);
+    // console.log(`Tiles removed - rescheduling growth (${grid.size} tiles, next search in ${(newInterval / 1000).toFixed(1)}s)`);
     scheduleNextStep(newInterval);
 }
 
@@ -382,7 +382,7 @@ function recordWordUsage(word) {
     wordUsageCount.set(word, count);
 
     if (count >= MAX_WORD_USES) {
-        console.log(`"${word}" has been used ${count} times (max reached)`);
+        // console.log(`"${word}" has been used ${count} times (max reached)`);
     }
 }
 
@@ -403,16 +403,16 @@ function growStep(deadline) {
         const placed = placeNextLetter();
         if (placed) {
             if (placed.blocked) {
-                console.log(`✗ Abandoned target "${currentTarget.word}" - blocked at position ${placed.index}`);
+                // console.log(`✗ Abandoned target "${currentTarget.word}" - blocked at position ${placed.index}`);
                 currentTarget = null;
                 // Word abandoned, wait before searching for next
                 scheduleNextStep(getSearchInterval());
             } else {
-                console.log(`Placed '${placed.letter}' at (${placed.x},${placed.y}) for "${currentTarget.word}" [${currentTarget.queueIndex}/${currentTarget.placementQueue.length}]`);
+                // console.log(`Placed '${placed.letter}' at (${placed.x},${placed.y}) for "${currentTarget.word}" [${currentTarget.queueIndex}/${currentTarget.placementQueue.length}]`);
 
                 // Check if word is complete
                 if (currentTarget.queueIndex >= currentTarget.placementQueue.length) {
-                    console.log(`✓ Completed word: "${currentTarget.word}"`);
+                    // console.log(`✓ Completed word: "${currentTarget.word}"`);
                     recordWordUsage(currentTarget.word);
                     currentTarget = null;
                     // Word complete, wait before searching for next
@@ -425,7 +425,7 @@ function growStep(deadline) {
             return;
         }
         // No more letters to place (queue exhausted)
-        console.log(`✓ Completed word: "${currentTarget.word}"`);
+        // console.log(`✓ Completed word: "${currentTarget.word}"`);
         recordWordUsage(currentTarget.word);
         currentTarget = null;
         // Word complete, wait before searching for next
@@ -517,7 +517,7 @@ function continueSearch(deadline, startTime) {
     if (!searchState) {
         searchState = initSearchState();
         if (!searchState) {
-            console.log(`No growth targets available [${(performance.now() - startTime).toFixed(1)}ms]`);
+            // console.log(`No growth targets available [${(performance.now() - startTime).toFixed(1)}ms]`);
             // No positions to check, try again later
             scheduleNextStep(getSearchInterval());
             return;
@@ -740,7 +740,7 @@ function finishSearch(startTime) {
     searchState = null;
 
     if (!state || state.candidates.length === 0) {
-        console.log(`No growth targets available [${(performance.now() - startTime).toFixed(1)}ms]`);
+        // console.log(`No growth targets available [${(performance.now() - startTime).toFixed(1)}ms]`);
         // No targets found, try again after search interval
         scheduleNextStep(getSearchInterval());
         return;
@@ -786,9 +786,9 @@ function finishSearch(startTime) {
 
     // Log semantic information
     if (selected.semanticScore > 0) {
-        console.log(`🌿 Semantic match: "${selected.word}" relates to [${selected.connectionWords.join(', ')}]`);
+        // console.log(`🌿 Semantic match: "${selected.word}" relates to [${selected.connectionWords.join(', ')}]`);
     }
-    console.log(`   (${semanticCount}/${state.candidates.length} candidates were semantically related)`)
+    // console.log(`   (${semanticCount}/${state.candidates.length} candidates were semantically related)`)
 
     // Build placement queue (outward from connection points)
     const placementQueue = buildPlacementQueue(
@@ -807,7 +807,7 @@ function finishSearch(startTime) {
         queueIndex: 0
     };
 
-    console.log(`→ New target: "${selected.word}" ${selected.direction} from (${selected.startX},${selected.startY}), ${placementQueue.length} letters to place [${(performance.now() - startTime).toFixed(1)}ms]`);
+    // console.log(`→ New target: "${selected.word}" ${selected.direction} from (${selected.startX},${selected.startY}), ${placementQueue.length} letters to place [${(performance.now() - startTime).toFixed(1)}ms]`);
 
     // Schedule first letter placement with letter interval
     scheduleNextStep(LETTER_INTERVAL);
@@ -1006,4 +1006,4 @@ function shuffleArray(array) {
 // Build growth word index on load (auto-starts growth when ready)
 buildWordIndex();
 
-console.log('Growth system loaded. Press G to toggle auto-growth.');
+// console.log('Growth system loaded. Press G to toggle auto-growth.');

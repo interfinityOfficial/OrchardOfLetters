@@ -263,7 +263,7 @@ async function loadDictionary() {
         const text = await response.text();
         const words = text.split('\n').map(w => w.trim().toUpperCase()).filter(w => w.length > 2);
         validWords = new Set(words);
-        console.log(`Loaded ${validWords.size} words`);
+        // console.log(`Loaded ${validWords.size} words`);
     } catch (error) {
         console.error('Failed to load dictionary:', error);
     }
@@ -555,7 +555,7 @@ function submitSeed() {
         return;
     }
 
-    console.log('Submitting seed:', word);
+    // console.log('Submitting seed:', word);
     emitSeedSet(word);
 }
 
@@ -765,7 +765,7 @@ function transitionToTreeMode(seedData) {
         // Center camera on the new seed
         centerOnSeed();
 
-        console.log('Transitioned to tree mode with seed:', seedData.seed);
+        // console.log('Transitioned to tree mode with seed:', seedData.seed);
 
         // Start the tree draw loop
         draw();
@@ -1105,8 +1105,8 @@ function initTiles() {
 function initWords() {
     if (window.PLANT_DATA && window.PLANT_DATA.words) {
         plantWords = new Set(window.PLANT_DATA.words.map(w => w.toUpperCase()));
-        console.log(`Loaded ${plantWords.size} plant-specific words from server`);
-        console.log(plantWords);
+        // console.log(`Loaded ${plantWords.size} plant-specific words from server`);
+        // console.log(plantWords);
     }
 }
 
@@ -1356,7 +1356,7 @@ function trackValidWord(word) {
                         pendingWordsToRemove.add(existingWord);
                     }
                     plantWords.delete(existingWord);
-                    console.log(`Word "${existingWord}" expanded to "${upperWord}", marking for removal`);
+                    // console.log(`Word "${existingWord}" expanded to "${upperWord}", marking for removal`);
                 }
             }
         }
@@ -1393,9 +1393,9 @@ function syncWordsToServer() {
     pendingWordsToRemove.clear();
 
     emitWordsSync(wordsToAdd, wordsToRemove);
-    console.log(`Syncing words: +${wordsToAdd.length} add, -${wordsToRemove.length} remove`);
-    if (wordsToAdd.length > 0) console.log('  Adding:', wordsToAdd);
-    if (wordsToRemove.length > 0) console.log('  Removing:', wordsToRemove);
+    // console.log(`Syncing words: +${wordsToAdd.length} add, -${wordsToRemove.length} remove`);
+    // if (wordsToAdd.length > 0) console.log('  Adding:', wordsToAdd);
+    // if (wordsToRemove.length > 0) console.log('  Removing:', wordsToRemove);
 }
 
 // Get all valid words that pass through a cell
@@ -1454,10 +1454,10 @@ function removeDeletedWords(wordsToCheck) {
             // If word was pending add, just cancel the add instead of adding to remove list
             if (pendingWordsToAdd.has(word)) {
                 pendingWordsToAdd.delete(word);
-                console.log(`Word "${word}" removed before sync, cancelling pending add`);
+                // console.log(`Word "${word}" removed before sync, cancelling pending add`);
             } else {
                 pendingWordsToRemove.add(word);
-                console.log(`Word "${word}" no longer exists on grid, marking for removal`);
+                // console.log(`Word "${word}" no longer exists on grid, marking for removal`);
             }
             hasChanges = true;
         }
@@ -2265,12 +2265,12 @@ async function init() {
 
     // Handle initial connection confirmation
     onSocketEvent('connected', (data) => {
-        console.log('Connected to plant:', data.plantId, 'Owner:', data.isOwner, 'Seed:', data.seed);
+        // console.log('Connected to plant:', data.plantId, 'Owner:', data.isOwner, 'Seed:', data.seed);
     });
 
     // Handle seed set confirmation - transition to tree mode
     onSocketEvent('seedSet', (data) => {
-        console.log('Seed set confirmed:', data);
+        // console.log('Seed set confirmed:', data);
         transitionToTreeMode(data);
         // draw() is now called inside transitionToTreeMode after the animation completes
     });
@@ -2287,7 +2287,7 @@ async function init() {
                 plantWords.add(word.toUpperCase());
             }
         }
-        console.log('Words changed by another client:', data);
+        // console.log('Words changed by another client:', data);
     });
 
     // Handle incoming tile updates from other clients/tabs
@@ -2358,7 +2358,7 @@ async function init() {
         seedInputMode = true;
         initSeedInputAnims();  // Initialize animation state
         showSeedInputUI();     // Show the HTML UI elements
-        console.log('No seed set - entering seed input mode');
+        // console.log('No seed set - entering seed input mode');
         drawSeedInput();
     } else {
         // Normal tree mode

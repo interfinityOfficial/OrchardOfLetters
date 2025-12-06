@@ -46,9 +46,9 @@ function connectSocket(username = null, mode = null) {
 
     socket.on('connected', (data) => {
         if (data.mode === 'home') {
-            console.log('Connected to home gallery');
+            // console.log('Connected to home gallery');
         } else {
-            console.log(`Plant confirmed: ${data.plantId} with ${data.tileCount} tiles`);
+            // console.log(`Plant confirmed: ${data.plantId} with ${data.tileCount} tiles`);
         }
         if (socketCallbacks.onConnected) {
             socketCallbacks.onConnected(data);
@@ -57,14 +57,14 @@ function connectSocket(username = null, mode = null) {
 
     // Handle words changed (added/removed) by other clients
     socket.on('words:changed', (data) => {
-        console.log('Words changed by another client:', data);
+        // console.log('Words changed by another client:', data);
         if (socketCallbacks.onWordsChanged) {
             socketCallbacks.onWordsChanged(data);
         }
     });
 
     socket.on('disconnect', () => {
-        console.log('WebSocket disconnected');
+        // console.log('WebSocket disconnected');
         isConnected = false;
         if (socketCallbacks.onDisconnect) {
             socketCallbacks.onDisconnect();
@@ -77,7 +77,7 @@ function connectSocket(username = null, mode = null) {
 
     // Handle incoming tile updates from other clients (plant view)
     socket.on('tile', (data) => {
-        console.log('Received tile update:', data);
+        // console.log('Received tile update:', data);
         if (socketCallbacks.onTile) {
             socketCallbacks.onTile(data);
         }
@@ -85,7 +85,7 @@ function connectSocket(username = null, mode = null) {
 
     // Handle incoming deletions from other clients (plant view)
     socket.on('delete', (data) => {
-        console.log('Received tile delete:', data);
+        // console.log('Received tile delete:', data);
         if (socketCallbacks.onDelete) {
             socketCallbacks.onDelete(data);
         }
@@ -93,7 +93,7 @@ function connectSocket(username = null, mode = null) {
 
     // Handle batch tile updates from other clients (plant view)
     socket.on('tiles:updated', (data) => {
-        console.log('Received tiles batch update:', data);
+        // console.log('Received tiles batch update:', data);
         if (socketCallbacks.onTilesUpdated) {
             socketCallbacks.onTilesUpdated(data);
         }
@@ -103,7 +103,7 @@ function connectSocket(username = null, mode = null) {
 
     // Handle plant tile updates (home gallery)
     socket.on('plant:tile', (data) => {
-        console.log('Received plant tile update:', data);
+        // console.log('Received plant tile update:', data);
         if (socketCallbacks.onPlantTile) {
             socketCallbacks.onPlantTile(data);
         }
@@ -111,7 +111,7 @@ function connectSocket(username = null, mode = null) {
 
     // Handle plant tile deletions (home gallery)
     socket.on('plant:delete', (data) => {
-        console.log('Received plant delete:', data);
+        // console.log('Received plant delete:', data);
         if (socketCallbacks.onPlantDelete) {
             socketCallbacks.onPlantDelete(data);
         }
@@ -119,7 +119,7 @@ function connectSocket(username = null, mode = null) {
 
     // Handle plant batch tile updates (home gallery)
     socket.on('plant:tiles:updated', (data) => {
-        console.log('Received plant tiles batch update:', data);
+        // console.log('Received plant tiles batch update:', data);
         if (socketCallbacks.onPlantTilesUpdated) {
             socketCallbacks.onPlantTilesUpdated(data);
         }
@@ -140,7 +140,7 @@ function connectSocket(username = null, mode = null) {
 
     socket.on('tiles:update:ack', (data) => {
         if (data.success) {
-            console.log(`Batch update saved: ${data.count} tiles`);
+            // console.log(`Batch update saved: ${data.count} tiles`);
         } else {
             console.error('Batch update failed');
         }
@@ -148,7 +148,7 @@ function connectSocket(username = null, mode = null) {
 
     socket.on('words:sync:ack', (data) => {
         if (data.success) {
-            console.log(`Words synced: +${data.added} added, -${data.removed} removed`);
+            // console.log(`Words synced: +${data.added} added, -${data.removed} removed`);
         } else {
             console.error('Words sync failed');
         }
@@ -157,7 +157,7 @@ function connectSocket(username = null, mode = null) {
     // Handle seed set acknowledgment
     socket.on('seed:set:ack', (data) => {
         if (data.success) {
-            console.log(`Seed set: ${data.seed}`);
+            // console.log(`Seed set: ${data.seed}`);
             if (socketCallbacks.onSeedSet) {
                 socketCallbacks.onSeedSet(data);
             }
