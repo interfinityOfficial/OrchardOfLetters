@@ -48,7 +48,7 @@ const loginButton = document.getElementById("login-button");
 const usernameInput = document.getElementById("username-input");
 
 loginButton.addEventListener("click", async () => {
-    const username = usernameInput.value.trim();
+    const username = usernameInput.value.trim().toLowerCase();
     if (!username) {
         showError("Please enter your username");
         return;

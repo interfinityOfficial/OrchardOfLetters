@@ -64,6 +64,6 @@ signupButton.addEventListener("click", async () => {
         showError("PLEASE ENTER A USERNAME");
         return;
     }
-    const username = usernameInput.value;
+    const username = usernameInput.value.toLowerCase();
     await signupWithPasskey(username);
 });

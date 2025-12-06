@@ -17,7 +17,7 @@ const loginChallenges = new Map();
 
 // Signup request - generate registration options
 router.post("/signup-request/", async (req, res) => {
-    const { username } = req.body;
+    const username = req.body.username?.toLowerCase();
     const existingUser = await prisma.user.findUnique({ where: { username } });
     if (existingUser) {
         return res.status(400).json({ error: "Username unavailable" });
@@ -91,7 +91,7 @@ router.post("/signup-response/", async (req, res) => {
 
 // Login request - generate authentication options
 router.post("/login-request/", async (req, res) => {
-    const { username } = req.body;
+    const username = req.body.username?.toLowerCase();
     const user = await prisma.user.findUnique({
         where: { username },
         include: { credentials: true }
