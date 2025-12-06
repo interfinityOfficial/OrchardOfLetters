@@ -61,7 +61,7 @@ router.post("/signup-response/", async (req, res) => {
             const dbUser = await prisma.user.create({
                 data: {
                     username: user.username,
-                    isAdmin: true,
+                    isAdmin: false,
                 },
             });
 
