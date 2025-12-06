@@ -16,7 +16,9 @@
       media="(prefers-color-scheme: dark)"
     />
     <link rel="stylesheet" href="/styles/main.css" />
-    <title>Plant</title>
+    <title>
+      Orchard of Letters - <%= isOwner ? "Your Plant" : `${username}'s Plant` %>
+    </title>
   </head>
   <body class="page-plant">
     <canvas id="plant-canvas"></canvas>
