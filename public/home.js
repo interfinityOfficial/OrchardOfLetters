@@ -139,7 +139,8 @@ function drawPlant(layout) {
     const { tiles, bounds, username } = plant;
     const cellSize = getCellSize();
     const fontSize = Math.floor(cellSize * 0.8846);
-    const canvasHeight = maxBoundsHeight * cellSize;
+    // Use window height so trees are anchored to the bottom of the screen
+    const canvasHeight = window.innerHeight;
 
     // Calculate plant offset within its world space
     const plantHeight = bounds.height * cellSize;
@@ -307,7 +308,8 @@ function getPlantSignAtScreen(screenX, screenY) {
     const worldX = screenX - camera.x;
     const worldY = screenY - camera.y;
     const cellSize = getCellSize();
-    const canvasHeight = maxBoundsHeight * cellSize;
+    // Use window height to match drawPlant positioning
+    const canvasHeight = window.innerHeight;
 
     // Sign board dimensions
     const boardHeight = cellSize;
