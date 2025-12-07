@@ -21,4 +21,6 @@ function logout() {
     window.location.href = '/logout/';
 }
 
-logoutButton.addEventListener('click', showAlert);
+if (logoutButton) {
+    logoutButton.addEventListener('click', showAlert);
+}
