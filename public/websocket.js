@@ -1,8 +1,8 @@
-// WebSocket client
+// WebSocket client state
 let socket = null;
 let isConnected = false;
 
-// Event callbacks
+// Registered event callbacks
 const socketCallbacks = {
     onTile: null,
     onDelete: null,
@@ -18,11 +18,7 @@ const socketCallbacks = {
     onPlantTilesUpdated: null,
 };
 
-/**
- * Connect to WebSocket server
- * @param {string|null} username - Username to view (null for own plant)
- * @param {string|null} mode - Connection mode ('home' for gallery, null for plant view)
- */
+// Open a socket connection with optional username and mode
 function connectSocket(username = null, mode = null) {
     if (socket) {
         console.warn('Socket already initialized');
@@ -99,8 +95,6 @@ function connectSocket(username = null, mode = null) {
         }
     });
 
-    // === Home gallery events ===
-
     // Handle plant tile updates (home gallery)
     socket.on('plant:tile', (data) => {
         // console.log('Received plant tile update:', data);
@@ -167,6 +161,7 @@ function connectSocket(username = null, mode = null) {
     });
 }
 
+// Emit a single tile placement/update
 function emitTile(x, y, letter, blooming = false) {
     if (!socket || !isConnected) {
         console.warn('Socket not connected, cannot emit tile');
@@ -175,6 +170,7 @@ function emitTile(x, y, letter, blooming = false) {
     socket.emit('tile', { x, y, letter, blooming });
 }
 
+// Emit a tile deletion with optional disconnected tiles
 function emitDelete(x, y, disconnected = []) {
     if (!socket || !isConnected) {
         console.warn('Socket not connected, cannot emit delete');
@@ -183,6 +179,7 @@ function emitDelete(x, y, disconnected = []) {
     socket.emit('delete', { x, y, disconnected });
 }
 
+// Emit a batch tiles update
 function emitTilesUpdate(tiles) {
     if (!socket || !isConnected) {
         console.warn('Socket not connected, cannot emit tiles update');
@@ -191,6 +188,7 @@ function emitTilesUpdate(tiles) {
     socket.emit('tiles:update', { tiles });
 }
 
+// Emit a word sync payload
 function emitWordsSync(add = [], remove = []) {
     if (!socket || !isConnected) {
         console.warn('Socket not connected, cannot emit words sync');
@@ -199,6 +197,7 @@ function emitWordsSync(add = [], remove = []) {
     socket.emit('words:sync', { add, remove });
 }
 
+// Emit a seed selection event
 function emitSeedSet(word) {
     if (!socket || !isConnected) {
         console.warn('Socket not connected, cannot emit seed set');
@@ -207,10 +206,12 @@ function emitSeedSet(word) {
     socket.emit('seed:set', { word });
 }
 
+// Report whether the socket is connected
 function isSocketConnected() {
     return isConnected;
 }
 
+// Register a callback for a socket event name
 function onSocketEvent(event, callback) {
     switch (event) {
         case 'tile':

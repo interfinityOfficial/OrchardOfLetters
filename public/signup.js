@@ -1,3 +1,4 @@
+// Start WebAuthn registration for the provided username
 async function signupWithPasskey(username) {
     const opts = await fetch("/signup-request/", {
         method: "POST",
@@ -36,12 +37,14 @@ async function signupWithPasskey(username) {
 
 const errorText = document.getElementById("error-text");
 
+// Track error text height to keep CSS variable updated
 const resizeObserver = new ResizeObserver(entries => {
     document.documentElement.style.setProperty('--error-text-height', errorText.scrollHeight + 'px');
 });
 resizeObserver.observe(document.documentElement);
 document.documentElement.style.setProperty('--error-text-height', errorText.scrollHeight + 'px');
 
+// Display an error message and reveal the error banner
 function showError(message) {
     errorText.innerHTML = message;
     document.documentElement.style.setProperty('--error-text-height', errorText.scrollHeight + 'px');

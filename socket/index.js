@@ -1,10 +1,6 @@
 const prisma = require('../lib/prisma');
 const { GRID_WIDTH, GRID_HEIGHT } = require('../lib/config');
 
-/**
- * Initialize Socket.IO handlers
- * @param {import('socket.io').Server} io - Socket.IO server instance
- */
 function initializeSocket(io) {
     io.on('connection', async (socket) => {
         const session = socket.request.session;
@@ -110,7 +106,7 @@ function initializeSocket(io) {
 
         const plantId = plant.id;
 
-        // Join a room for this plant (for multi-viewer support)
+        // Join a room for this plant
         socket.join(`plant:${plantId}`);
 
         // Send initial state

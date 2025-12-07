@@ -1,3 +1,4 @@
+// Start WebAuthn authentication for the given username
 async function loginWithPasskey(username) {
     const opts = await fetch("/login-request/", {
         method: "POST",
@@ -32,12 +33,14 @@ async function loginWithPasskey(username) {
 
 const errorText = document.getElementById("error-text");
 
+// Track error text height to keep CSS variable in sync
 const resizeObserver = new ResizeObserver(entries => {
     document.documentElement.style.setProperty('--error-text-height', errorText.scrollHeight + 'px');
 });
 resizeObserver.observe(document.documentElement);
 document.documentElement.style.setProperty('--error-text-height', errorText.scrollHeight + 'px');
 
+// Display an error message and expand the error banner
 function showError(message) {
     errorText.innerHTML = message;
     document.documentElement.style.setProperty('--error-text-height', errorText.scrollHeight + 'px');
