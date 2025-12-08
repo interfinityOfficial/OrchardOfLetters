@@ -22,6 +22,20 @@
   </head>
   <body class="page-plant">
     <canvas id="plant-canvas"></canvas>
+    <input
+      type="text"
+      id="hidden-keyboard-input"
+      autocomplete="off"
+      autocapitalize="characters"
+      autocorrect="off"
+      spellcheck="false"
+      style="
+        position: absolute;
+        left: -9999px;
+        opacity: 0;
+        pointer-events: none;
+      "
+    />
 
     <div class="seed-input-ui hidden" id="seed-input-ui">
       <div class="seed-text-column" id="seed-title">

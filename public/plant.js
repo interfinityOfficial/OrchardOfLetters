@@ -2,6 +2,58 @@ const canvas = document.getElementById('plant-canvas');
 const ctx = canvas.getContext('2d');
 
 const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+// Hidden input for mobile keyboard support
+const hiddenInput = document.getElementById('hidden-keyboard-input');
+
+// Focus hidden input to trigger mobile keyboard (touch devices only)
+function focusHiddenInput() {
+    if (!isTouchDevice || !hiddenInput) return;
+    hiddenInput.value = '';
+    hiddenInput.focus({ preventScroll: true });
+}
+
+// Blur hidden input to hide mobile keyboard
+function blurHiddenInput() {
+    if (!isTouchDevice || !hiddenInput) return;
+    hiddenInput.blur();
+}
+
+// Set up hidden input event listeners for touch devices
+if (isTouchDevice && hiddenInput) {
+    // Handle letter input from mobile keyboard
+    hiddenInput.addEventListener('input', (e) => {
+        const value = e.target.value;
+        if (value && value.length > 0) {
+            const letter = value[value.length - 1];
+            if (letter.match(/[a-zA-Z]/)) {
+                // Dispatch a synthetic keydown event
+                const syntheticEvent = new KeyboardEvent('keydown', {
+                    key: letter,
+                    bubbles: true,
+                    cancelable: true
+                });
+                document.dispatchEvent(syntheticEvent);
+            }
+            hiddenInput.value = '';
+        }
+    });
+
+    // Handle backspace and enter via keydown on the hidden input
+    hiddenInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' || e.key === 'Enter') {
+            // Dispatch to document for existing handlers
+            const syntheticEvent = new KeyboardEvent('keydown', {
+                key: e.key,
+                bubbles: true,
+                cancelable: true
+            });
+            document.dispatchEvent(syntheticEvent);
+            e.preventDefault();
+        }
+    });
+}
 
 let seedInputMode = false;
 const SEED_INPUT_LENGTH = 8;
@@ -1900,6 +1952,7 @@ document.addEventListener('keydown', (e) => {
 
     if (e.key === 'Escape') {
         selectedCell = null;
+        blurHiddenInput();
     }
 });
 
@@ -1913,6 +1966,12 @@ canvas.addEventListener('touchstart', (e) => {
     const touch = e.touches[0];
     touchStartPos = { x: touch.clientX, y: touch.clientY };
     touchStartCamera = { ...camera };
+
+    // In seed input mode, track hover for visual feedback
+    if (seedInputMode) {
+        const tileIndex = getSeedInputTileAt(touch.clientX, touch.clientY);
+        seedInputHovered = tileIndex >= 0 ? tileIndex : -1;
+    }
 });
 
 canvas.addEventListener('touchmove', (e) => {
@@ -1920,6 +1979,14 @@ canvas.addEventListener('touchmove', (e) => {
 
     e.preventDefault();
     if (!touchStartPos) return;
+
+    // No panning in seed input mode
+    if (seedInputMode) {
+        const touch = e.touches[0];
+        const tileIndex = getSeedInputTileAt(touch.clientX, touch.clientY);
+        seedInputHovered = tileIndex >= 0 ? tileIndex : -1;
+        return;
+    }
 
     const touch = e.touches[0];
     const dx = touch.clientX - touchStartPos.x;
@@ -1937,6 +2004,27 @@ canvas.addEventListener('touchmove', (e) => {
 canvas.addEventListener('touchend', (e) => {
     if (seedTransitionActive) return;
 
+    if (seedInputMode) {
+        // Handle seed input mode touch selection
+        if (touchStartPos) {
+            const touch = e.changedTouches[0];
+            const dx = Math.abs(touch.clientX - touchStartPos.x);
+            const dy = Math.abs(touch.clientY - touchStartPos.y);
+
+            if (dx < 10 && dy < 10) {
+                const tileIndex = getSeedInputTileAt(touch.clientX, touch.clientY);
+                if (tileIndex >= 0) {
+                    seedInputSelected = tileIndex;
+                    focusHiddenInput();
+                }
+            }
+        }
+        seedInputHovered = -1;
+        touchStartPos = null;
+        touchStartCamera = null;
+        return;
+    }
+
     if (touchStartPos) {
         const touch = e.changedTouches[0];
         const dx = Math.abs(touch.clientX - touchStartPos.x);
@@ -1948,12 +2036,15 @@ canvas.addEventListener('touchend', (e) => {
 
                 if (isInteractable(gridPos.x, gridPos.y)) {
                     selectedCell = gridPos;
+                    focusHiddenInput();
                 } else {
                     selectedCell = null;
+                    blurHiddenInput();
                 }
             }
         } else {
             hideMinimap();
+            blurHiddenInput();
         }
     }
 
@@ -2066,6 +2157,10 @@ async function init() {
         initSeedInputAnims();
         showSeedInputUI();
         drawSeedInput();
+        // Focus hidden input for mobile keyboard on touch devices
+        if (isTouchDevice) {
+            setTimeout(() => focusHiddenInput(), 100);
+        }
     } else {
         initTiles();
         initCellAnims();
