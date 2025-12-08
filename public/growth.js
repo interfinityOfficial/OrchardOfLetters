@@ -41,7 +41,7 @@ let clustersLoaded = false;
 async function loadGrowthDictionary() {
     if (growthWordsLoaded) return;
     try {
-        const response = await fetch('/words/inquirer_wordlist.txt');
+        const response = await fetch('/words/shortlist.txt');
         const text = await response.text();
         const words = text.split('\n').map(w => w.trim().toUpperCase()).filter(w => w.length > 3);
         growthWords = new Set(words);
@@ -57,7 +57,7 @@ async function loadGrowthDictionary() {
 async function loadSemanticClusters() {
     if (clustersLoaded) return;
     try {
-        const response = await fetch('/words/inquirer_clusters.json');
+        const response = await fetch('/words/shortlist_clusters.json');
         const categoryData = await response.json();
 
         wordClusters = {};
