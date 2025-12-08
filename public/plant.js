@@ -1943,12 +1943,14 @@ canvas.addEventListener('touchend', (e) => {
         const dy = Math.abs(touch.clientY - touchStartPos.y);
 
         if (dx < 10 && dy < 10) {
-            const gridPos = screenToGrid(touch.clientX, touch.clientY);
+            if (window.PLANT_DATA.canEdit) {
+                const gridPos = screenToGrid(touch.clientX, touch.clientY);
 
-            if (isInteractable(gridPos.x, gridPos.y)) {
-                selectedCell = gridPos;
-            } else {
-                selectedCell = null;
+                if (isInteractable(gridPos.x, gridPos.y)) {
+                    selectedCell = gridPos;
+                } else {
+                    selectedCell = null;
+                }
             }
         } else {
             hideMinimap();
