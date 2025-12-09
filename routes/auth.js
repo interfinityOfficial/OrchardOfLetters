@@ -112,17 +112,49 @@ router.post("/login-request/", async (req, res) => {
     res.json({ options: options, userId: user.id });
 });
 
+// Autofill login request - generate options for conditional UI (no username required)
+router.get("/login-autofill-request/", async (req, res) => {
+    const options = await generateAuthenticationOptions({
+        timeout: 60000,
+        rpID,
+        userVerification: "preferred",
+        // Empty allowCredentials lets browser show all available passkeys
+    });
+
+    // Store challenge with a special key for autofill requests
+    loginChallenges.set(`autofill:${options.challenge}`, options.challenge);
+    res.json({ options });
+});
+
 // Login response - verify authentication
 router.post("/login-response/", async (req, res) => {
-    const { userId, authenticationResponse } = req.body;
-    const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user) return res.status(404).json({ error: "User not found" });
+    const { userId, authenticationResponse, isAutofill } = req.body;
 
-    const expectedChallenge = loginChallenges.get(userId);
-    if (!expectedChallenge) return res.status(400).json({ error: "No login challenge found" });
-
-    const cred = await prisma.credential.findUnique({ where: { credentialId: authenticationResponse.id } });
+    // Look up the credential first (works for both autofill and regular login)
+    const cred = await prisma.credential.findUnique({
+        where: { credentialId: authenticationResponse.id },
+        include: { user: true }
+    });
     if (!cred) return res.status(404).json({ error: "Credential not found" });
+
+    const user = cred.user;
+
+    // Determine the expected challenge based on login type
+    let expectedChallenge;
+    if (isAutofill) {
+        // For autofill, find and use the autofill challenge from the response
+        const clientDataJSON = Buffer.from(authenticationResponse.response.clientDataJSON, 'base64url');
+        const clientData = JSON.parse(clientDataJSON.toString('utf8'));
+        const challenge = clientData.challenge;
+        expectedChallenge = loginChallenges.get(`autofill:${challenge}`);
+        if (expectedChallenge) {
+            loginChallenges.delete(`autofill:${challenge}`);
+        }
+    } else {
+        expectedChallenge = loginChallenges.get(userId);
+    }
+
+    if (!expectedChallenge) return res.status(400).json({ error: "No login challenge found" });
 
     try {
         const verification = await verifyAuthenticationResponse({
@@ -143,7 +175,10 @@ router.post("/login-response/", async (req, res) => {
                 where: { id: cred.id },
                 data: { counter: verification.authenticationInfo.newCounter },
             });
-            loginChallenges.delete(userId);
+
+            if (!isAutofill) {
+                loginChallenges.delete(userId);
+            }
 
             req.session.userId = user.id;
             req.session.username = user.username;

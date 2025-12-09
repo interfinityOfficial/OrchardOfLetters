@@ -246,6 +246,7 @@ body.page-login {
 }
 
 body.page-login main {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -396,7 +397,8 @@ body.page-about {
   overflow: auto;
 }
 
-body.page-about main {
+body.page-about main,
+body.page-privacy main {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -406,7 +408,8 @@ body.page-about main {
   min-height: calc(100dvh);
 }
 
-.about-container {
+.about-container,
+.privacy-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -416,7 +419,9 @@ body.page-about main {
 }
 
 .about-content,
-.copyright {
+.privacy-content,
+.copyright,
+.footer {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -439,7 +444,8 @@ body.page-about main {
   -ms-user-select: text;
 }
 
-.about-content a {
+.about-content a,
+.privacy-content a {
   font-size: calc(var(--nav-button-cell-size) * 0.97);
   color: #ffffff;
   -webkit-text-stroke: calc(var(--nav-button-cell-size) * 0.08)
@@ -450,18 +456,46 @@ body.page-about main {
   transition: color 0.3s ease-in-out, -webkit-text-stroke 0.3s ease-in-out;
 }
 
-.about-content a:hover {
+.about-content a:hover,
+.privacy-content a:hover {
   color: var(--blooming-color);
   -webkit-text-stroke: calc(var(--nav-button-cell-size) * 0.08) transparent;
 }
 
-.copyright {
+.copyright,
+.footer {
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
   padding: calc(var(--logo-cell-size) * 0.5);
   opacity: 0.5;
   font-size: calc(var(--nav-button-cell-size) * 0.97 * 0.6);
+}
+
+.footer {
+  opacity: 1;
+
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+}
+
+.footer a {
+  font-size: calc(var(--nav-button-cell-size) * 0.97 * 0.6);
+  color: #ffffff;
+  -webkit-text-stroke: calc(var(--nav-button-cell-size) * 0.08 * 0.6)
+    var(--blooming-color);
+  font-family: "Retro", monospace;
+  letter-spacing: 0.05em;
+
+  transition: color 0.3s ease-in-out, -webkit-text-stroke 0.3s ease-in-out;
+}
+
+.footer a:hover {
+  color: var(--blooming-color);
+  -webkit-text-stroke: calc(var(--nav-button-cell-size) * 0.08 * 0.6)
+    transparent;
 }
 
 .alert {

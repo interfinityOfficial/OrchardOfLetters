@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="icon"
+      href="/assets/icon.png"
+      type="image/x-icon"
+      media="(prefers-color-scheme: light)"
+    />
+    <link
+      rel="icon"
+      href="/assets/icon.png"
+      type="image/x-icon"
+      media="(prefers-color-scheme: dark)"
+    />
+    <link rel="stylesheet" href="/styles/main.css" />
+    <title>Orchard of Letters - Privacy</title>
+  </head>
+  <body class="page-privacy">
+    <div class="logo">
+      <div class="logo-column">
+        <div class="logo-letter">P</div>
+        <div class="logo-letter">R</div>
+        <div class="logo-letter">I</div>
+        <div class="logo-letter">V</div>
+        <div class="logo-letter">A</div>
+        <div class="logo-letter">C</div>
+        <div class="logo-letter">Y</div>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <a href="/" class="nav-button">
+        <div class="nav-button-letter">O</div>
+        <div class="nav-button-letter">R</div>
+        <div class="nav-button-letter">C</div>
+        <div class="nav-button-letter">H</div>
+        <div class="nav-button-letter">A</div>
+        <div class="nav-button-letter">R</div>
+        <div class="nav-button-letter">D</div>
+      </a>
+      <% if (userId) { %>
+      <a href="/plant/" class="nav-button">
+        <div class="nav-button-letter">P</div>
+        <div class="nav-button-letter">L</div>
+        <div class="nav-button-letter">A</div>
+        <div class="nav-button-letter">N</div>
+        <div class="nav-button-letter">T</div>
+      </a>
+      <button class="nav-button" id="logout-button">
+        <div class="nav-button-letter">L</div>
+        <div class="nav-button-letter">O</div>
+        <div class="nav-button-letter">G</div>
+        <div class="nav-button-letter">O</div>
+        <div class="nav-button-letter">U</div>
+        <div class="nav-button-letter">T</div>
+      </button>
+      <% } %>
+    </div>
+    <main>
+      <div class="privacy-container">
+        <div class="privacy-content">
+          <p>
+            We use
+            <a href="https://developer.apple.com/passkeys/">passkeys</a> to keep
+            your account secure. <br /><br />
+            When you create an account, we store your username and passkey
+            credentials. We use session cookies to keep you logged in.<br /><br />
+
+            Your plant data (seed word and all letters) is stored on our servers
+            and visible to anyone visiting this site. <br /><br />
+
+            We reserve the right to remove any words deemed inappropriate or
+            sensitive. <br /><br />
+          </p>
+        </div>
+      </div>
+
+      <div class="copyright">
+        <span>
+          Copyright <%= new Date().getFullYear() %> interfinity Limited.
+        </span>
+      </div>
+    </main>
+    <div class="alert">
+      <div class="alert-content">
+        <p>Confirm Logout?</p>
+      </div>
+      <div class="alert-buttons">
+        <button
+          class="alert-button alert-button-secondary"
+          id="alert-button-secondary"
+        >
+          Cancel
+        </button>
+        <button class="alert-button" id="alert-button-primary">Logout</button>
+      </div>
+    </div>
+
+    <script src="/alert.js"></script>
+  </body>
+</html>

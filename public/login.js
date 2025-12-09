@@ -1,5 +1,15 @@
+// Track if conditional UI is active to avoid conflicts
+let conditionalUIActive = false;
+let conditionalUIAbortController = null;
+
 // Start WebAuthn authentication for the given username
 async function loginWithPasskey(username) {
+    // Abort conditional UI if active to avoid conflicts
+    if (conditionalUIAbortController) {
+        conditionalUIAbortController.abort();
+        conditionalUIAbortController = null;
+    }
+
     const opts = await fetch("/login-request/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -30,6 +40,62 @@ async function loginWithPasskey(username) {
         return;
     }
 }
+
+// Start conditional UI (passkey autofill) if supported
+async function startConditionalUI() {
+    // Check if conditional UI is supported
+    if (!SimpleWebAuthnBrowser.browserSupportsWebAuthnAutofill ||
+        !(await SimpleWebAuthnBrowser.browserSupportsWebAuthnAutofill())) {
+        return;
+    }
+
+    try {
+        // Get authentication options for autofill
+        const opts = await fetch("/login-autofill-request/").then(r => r.json());
+        if (opts.error) {
+            console.warn("Failed to get autofill options:", opts.error);
+            return;
+        }
+
+        conditionalUIActive = true;
+        conditionalUIAbortController = new AbortController();
+
+        // Start authentication with autofill enabled
+        const authResp = await SimpleWebAuthnBrowser.startAuthentication({
+            optionsJSON: opts.options,
+            useBrowserAutofill: true,
+            signal: conditionalUIAbortController.signal
+        });
+
+        conditionalUIActive = false;
+
+        // Submit the response
+        const response = await fetch("/login-response/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                authenticationResponse: authResp,
+                isAutofill: true
+            })
+        }).then(r => r.json());
+
+        if (response.error) {
+            showError(response.error);
+            return;
+        }
+
+        window.location.href = "/plant/";
+    } catch (err) {
+        conditionalUIActive = false;
+        // AbortError is expected when user starts manual login
+        if (err.name !== "AbortError") {
+            console.warn("Conditional UI error:", err);
+        }
+    }
+}
+
+// Start conditional UI when page loads
+startConditionalUI();
 
 const errorText = document.getElementById("error-text");
 

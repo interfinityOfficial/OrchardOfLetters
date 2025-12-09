@@ -94,6 +94,14 @@ router.get('/about/', async (req, res) => {
     });
 });
 
+// Privacy page
+router.get('/privacy/', async (req, res) => {
+    const userId = req.session.userId;
+    res.render('privacy.ejs', {
+        userId: userId
+    });
+});
+
 // Plant page - user's own plant (edit mode)
 router.get('/plant/', async (req, res) => {
     // Require authentication
