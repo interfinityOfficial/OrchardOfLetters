@@ -393,7 +393,8 @@ input::placeholder {
   width: 100%;
 }
 
-body.page-about {
+body.page-about,
+body.page-privacy {
   overflow: auto;
 }
 
@@ -416,6 +417,11 @@ body.page-privacy main {
   justify-content: center;
   min-height: calc(100vh - var(--logo-cell-size) * 7.2);
   min-height: calc(100dvh - var(--logo-cell-size) * 7.2);
+}
+
+.privacy-container {
+  min-height: calc(100vh - var(--logo-cell-size) * 9.6);
+  min-height: calc(100dvh - var(--logo-cell-size) * 9.6);
 }
 
 .about-content,
@@ -442,6 +448,10 @@ body.page-privacy main {
   -webkit-user-select: text;
   -moz-user-select: text;
   -ms-user-select: text;
+}
+
+.privacy-content {
+  padding-top: calc(var(--logo-cell-size) * 9.6);
 }
 
 .about-content a,
