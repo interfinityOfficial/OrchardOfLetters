@@ -1,5 +1,115 @@
 const prisma = require('../lib/prisma');
+const logger = require('../lib/logger');
 const { GRID_WIDTH, GRID_HEIGHT } = require('../lib/config');
+
+const rateLimitMap = new Map();
+
+function checkRateLimit(socketId, event, limit = 10, windowMs = 1000) {
+    const key = `${socketId}:${event}`;
+    const now = Date.now();
+    const record = rateLimitMap.get(key) || { count: 0, start: now };
+
+    if (now - record.start > windowMs) {
+        record.count = 1;
+        record.start = now;
+    } else {
+        record.count++;
+    }
+
+    rateLimitMap.set(key, record);
+    return record.count <= limit;
+}
+
+// Clean up old rate limit entries periodically
+setInterval(() => {
+    const now = Date.now();
+    for (const [key, record] of rateLimitMap.entries()) {
+        if (now - record.start > 60000) {
+            rateLimitMap.delete(key);
+        }
+    }
+}, 60000);
+
+const plantCache = new Map();
+const CACHE_TTL = 60000;
+
+function getCachedPlant(plantId) {
+    const cached = plantCache.get(plantId);
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+        return cached.data;
+    }
+    return null;
+}
+
+function setCachedPlant(plantId, data) {
+    plantCache.set(plantId, { data, timestamp: Date.now() });
+}
+
+function invalidatePlantCache(plantId) {
+    plantCache.delete(plantId);
+}
+
+// Clean up old cache entries periodically
+setInterval(() => {
+    const now = Date.now();
+    for (const [key, entry] of plantCache.entries()) {
+        if (now - entry.timestamp > CACHE_TTL) {
+            plantCache.delete(key);
+        }
+    }
+}, CACHE_TTL);
+
+const tileUpdateQueues = new Map();
+
+async function flushTileUpdates(plantId, io, plantUsername) {
+    const queue = tileUpdateQueues.get(plantId);
+    if (!queue || queue.tiles.length === 0) return;
+
+    const tiles = [...queue.tiles];
+    queue.tiles = [];
+
+    try {
+        // Batch upsert all tiles in a transaction
+        await prisma.$transaction(
+            tiles.map(({ x, y, letter, blooming }) =>
+                prisma.tile.upsert({
+                    where: { plantId_x_y: { plantId, x, y } },
+                    update: { letter: letter.toUpperCase(), blooming: blooming ?? false },
+                    create: {
+                        plantId,
+                        x,
+                        y,
+                        letter: letter.toUpperCase(),
+                        isSeed: false,
+                        blooming: blooming ?? false,
+                    },
+                })
+            )
+        );
+
+        // Broadcast all tiles to plant room and home gallery
+        for (const tile of tiles) {
+            const tileData = {
+                x: tile.x,
+                y: tile.y,
+                letter: tile.letter.toUpperCase(),
+                isSeed: false,
+                blooming: tile.blooming ?? false,
+            };
+
+            io.to(`plant:${plantId}`).emit('tile', tileData);
+            io.to('home:gallery').emit('plant:tile', {
+                username: plantUsername,
+                ...tileData,
+            });
+        }
+
+        // Invalidate cache after batch update
+        invalidatePlantCache(plantId);
+    } catch (err) {
+        logger.error('Batch tile flush error:', err);
+    }
+}
 
 function initializeSocket(io) {
     io.on('connection', async (socket) => {
@@ -13,20 +123,20 @@ function initializeSocket(io) {
         // Home gallery mode - subscribe to all plant updates
         if (mode === 'home') {
             socket.join('home:gallery');
-            console.log('Client joined home gallery');
+            logger.log('Client joined home gallery');
 
             socket.emit('connected', { mode: 'home' });
 
             socket.on('disconnect', () => {
-                console.log('Home gallery viewer disconnected');
+                logger.log('Home gallery viewer disconnected');
             });
-            return;  // Don't process further - home mode only receives updates
+            return;
         }
 
         let plant;
         let isOwner = false;
-        let canEdit = false;  // True if owner OR admin
-        let plantUsername = null;  // Track the username for this plant
+        let canEdit = false; // True if owner OR admin
+        let plantUsername = null;
 
         if (targetUsername) {
             // Viewing a specific user's plant by username
@@ -36,14 +146,14 @@ function initializeSocket(io) {
                     plant: {
                         include: {
                             tiles: true,
-                            words: true
-                        }
-                    }
-                }
+                            words: true,
+                        },
+                    },
+                },
             });
 
             if (!targetUser || !targetUser.plant) {
-                console.log(`Plant not found for user: ${targetUsername}`);
+                logger.log(`Plant not found for user: ${targetUsername}`);
                 socket.emit('error', { message: 'Plant not found' });
                 socket.disconnect();
                 return;
@@ -57,18 +167,20 @@ function initializeSocket(io) {
             if (viewerId && !isOwner) {
                 const viewer = await prisma.user.findUnique({
                     where: { id: viewerId },
-                    select: { isAdmin: true }
+                    select: { isAdmin: true },
                 });
                 canEdit = viewer?.isAdmin ?? false;
             } else {
                 canEdit = isOwner;
             }
 
-            console.log(`User ${viewerId || 'anonymous'} viewing ${targetUsername}'s plant (owner: ${isOwner}, canEdit: ${canEdit})`);
+            logger.log(
+                `User ${viewerId || 'anonymous'} viewing ${targetUsername}'s plant (owner: ${isOwner}, canEdit: ${canEdit})`
+            );
         } else {
             // No username provided - must be authenticated to view own plant
             if (!viewerId) {
-                console.log('Unauthorized socket connection attempt');
+                logger.log('Unauthorized socket connection attempt');
                 socket.emit('error', { message: 'Not authenticated' });
                 socket.disconnect();
                 return;
@@ -80,12 +192,11 @@ function initializeSocket(io) {
                 include: {
                     tiles: true,
                     words: true,
-                    user: { select: { username: true } }
-                }
+                    user: { select: { username: true } },
+                },
             });
 
             if (!plant) {
-                // Create new plant WITHOUT seed tiles - user will choose their seed
                 plant = await prisma.plant.create({
                     data: {
                         userId: viewerId,
@@ -93,18 +204,21 @@ function initializeSocket(io) {
                     include: {
                         tiles: true,
                         words: true,
-                        user: { select: { username: true } }
-                    }
+                        user: { select: { username: true } },
+                    },
                 });
             }
 
             isOwner = true;
-            canEdit = true;  // Owner can always edit
+            canEdit = true; // Owner can always edit
             plantUsername = plant.user.username;
-            console.log(`User ${viewerId} (${plantUsername}) connected to their own plant`);
+            logger.log(`User ${viewerId} (${plantUsername}) connected to their own plant`);
         }
 
         const plantId = plant.id;
+
+        // Cache the plant data
+        setCachedPlant(plantId, plant);
 
         // Join a room for this plant
         socket.join(`plant:${plantId}`);
@@ -116,11 +230,15 @@ function initializeSocket(io) {
             canEdit,
             seed: plant.seed || null,
             tileCount: plant.tiles.length,
-            validWords: plant.words.map(w => w.word)
+            validWords: plant.words.map((w) => w.word),
         });
 
-        // Handle seed word setting (owner only, one-time - admins cannot set seed for others)
         socket.on('seed:set', async (data) => {
+            if (!checkRateLimit(socket.id, 'seed:set', 3, 10000)) {
+                socket.emit('error', { message: 'Rate limited' });
+                return;
+            }
+
             if (!isOwner) {
                 socket.emit('error', { message: 'Only the owner can set the seed word' });
                 return;
@@ -128,32 +246,21 @@ function initializeSocket(io) {
 
             const { word } = data;
 
+            // Validate seed word
+            if (typeof word !== 'string' || word.length < 5 || word.length > 8) {
+                socket.emit('error', { message: 'Seed must be 5-8 letters' });
+                return;
+            }
+
             try {
                 // Check if seed is already set
                 const currentPlant = await prisma.plant.findUnique({
                     where: { id: plantId },
-                    select: { seed: true }
+                    select: { seed: true },
                 });
 
-                if (currentPlant.seed) {
+                if (currentPlant?.seed) {
                     socket.emit('error', { message: 'Seed already set' });
-                    return;
-                }
-
-                // Validate seed word
-                if (typeof word !== 'string' || word.length < 5 || word.length > 8) {
-                    socket.emit('error', { message: 'Seed must be 5-8 letters' });
-                    return;
-                }
-
-                // Check if seed is already set
-                const existingPlant = await prisma.plant.findUnique({
-                    where: { id: plantId },
-                    select: { seed: true }
-                });
-
-                if (existingPlant?.seed) {
-                    socket.emit('error', { message: 'Seed is already set' });
                     return;
                 }
 
@@ -163,57 +270,63 @@ function initializeSocket(io) {
                 const seedX = Math.floor(GRID_WIDTH / 2);
                 const seedStartY = GRID_HEIGHT - seedWord.length;
 
-                // Delete any existing tiles first (in case of data corruption)
-                await prisma.tile.deleteMany({
-                    where: { plantId: plantId }
+                // Use transaction for atomic seed creation
+                const updatedPlant = await prisma.$transaction(async (tx) => {
+                    // Delete any existing tiles first (in case of data corruption)
+                    await tx.tile.deleteMany({
+                        where: { plantId: plantId },
+                    });
+
+                    // Update plant with seed and create seed tiles
+                    return tx.plant.update({
+                        where: { id: plantId },
+                        data: {
+                            seed: seedWord,
+                            tiles: {
+                                create: seedWord.split('').map((letter, i) => ({
+                                    x: seedX,
+                                    y: seedStartY + i,
+                                    letter: letter,
+                                    isSeed: true,
+                                    blooming: true,
+                                })),
+                            },
+                        },
+                        include: { tiles: true },
+                    });
                 });
 
-                // Update plant with seed and create seed tiles
-                const updatedPlant = await prisma.plant.update({
-                    where: { id: plantId },
-                    data: {
-                        seed: seedWord,
-                        tiles: {
-                            create: seedWord.split('').map((letter, i) => ({
-                                x: seedX,
-                                y: seedStartY + i,
-                                letter: letter,
-                                isSeed: true,
-                                blooming: true
-                            }))
-                        }
-                    },
-                    include: {
-                        tiles: true
-                    }
-                });
+                // Invalidate cache
+                invalidatePlantCache(plantId);
 
                 // Format tiles for response
-                const tiles = updatedPlant.tiles.map(t => ({
+                const tiles = updatedPlant.tiles.map((t) => ({
                     x: t.x,
                     y: t.y,
                     letter: t.letter,
                     isSeed: t.isSeed,
-                    blooming: t.blooming
+                    blooming: t.blooming,
                 }));
 
                 // Acknowledge to sender with tiles data
                 socket.emit('seed:set:ack', {
                     success: true,
                     seed: seedWord,
-                    tiles
+                    tiles,
                 });
 
-                console.log(`Seed set for plant ${plantId}: ${seedWord}`);
-
+                logger.log(`Seed set for plant ${plantId}: ${seedWord}`);
             } catch (err) {
-                console.error('Seed set error:', err);
+                logger.error('Seed set error:', err);
                 socket.emit('error', { message: 'Failed to set seed' });
             }
         });
 
-        // Handle tile placement/update (owner or admin)
         socket.on('tile', async (data) => {
+            if (!checkRateLimit(socket.id, 'tile', 30, 1000)) {
+                return;
+            }
+
             if (!canEdit) {
                 socket.emit('error', { message: 'Not authorized to edit this plant' });
                 return;
@@ -221,60 +334,45 @@ function initializeSocket(io) {
 
             const { x, y, letter, blooming } = data;
 
-            try {
-                // Validate input
-                if (typeof x !== 'number' || typeof y !== 'number' || typeof letter !== 'string') {
-                    socket.emit('error', { message: 'Invalid tile data' });
-                    return;
-                }
-
-                // Upsert the tile
-                await prisma.tile.upsert({
-                    where: {
-                        plantId_x_y: { plantId, x, y }
-                    },
-                    update: {
-                        letter: letter.toUpperCase(),
-                        blooming: blooming ?? false
-                    },
-                    create: {
-                        plantId,
-                        x,
-                        y,
-                        letter: letter.toUpperCase(),
-                        isSeed: false,
-                        blooming: blooming ?? false
-                    }
-                });
-
-                const tileData = {
-                    x,
-                    y,
-                    letter: letter.toUpperCase(),
-                    isSeed: false,
-                    blooming: blooming ?? false
-                };
-
-                // Broadcast to other clients viewing this plant
-                socket.to(`plant:${plantId}`).emit('tile', tileData);
-
-                // Broadcast to home gallery viewers
-                io.to('home:gallery').emit('plant:tile', {
-                    username: plantUsername,
-                    ...tileData
-                });
-
-                // Acknowledge to sender
-                socket.emit('tile:ack', { x, y, success: true });
-
-            } catch (err) {
-                console.error('Tile update error:', err);
-                socket.emit('error', { message: 'Failed to save tile' });
+            // Validate input
+            if (typeof x !== 'number' || typeof y !== 'number' || typeof letter !== 'string') {
+                socket.emit('error', { message: 'Invalid tile data' });
+                return;
             }
+
+            // Initialize queue for this plant if needed
+            if (!tileUpdateQueues.has(plantId)) {
+                tileUpdateQueues.set(plantId, { tiles: [], timeout: null });
+            }
+
+            const queue = tileUpdateQueues.get(plantId);
+
+            // Add tile to queue
+            const existingIdx = queue.tiles.findIndex((t) => t.x === x && t.y === y);
+            if (existingIdx >= 0) {
+                queue.tiles[existingIdx] = { x, y, letter, blooming };
+            } else {
+                queue.tiles.push({ x, y, letter, blooming });
+            }
+
+            // Acknowledge immediately
+            socket.emit('tile:ack', { x, y, success: true });
+
+            // Debounce the flush
+            if (queue.timeout) {
+                clearTimeout(queue.timeout);
+            }
+            queue.timeout = setTimeout(() => {
+                flushTileUpdates(plantId, io, plantUsername);
+            }, 100);
         });
 
-        // Handle batch tile updates (owner or admin)
         socket.on('tiles:update', async (data) => {
+            if (!checkRateLimit(socket.id, 'tiles:update', 10, 1000)) {
+                socket.emit('error', { message: 'Rate limited' });
+                return;
+            }
+
             if (!canEdit) {
                 socket.emit('error', { message: 'Not authorized to edit this plant' });
                 return;
@@ -288,22 +386,25 @@ function initializeSocket(io) {
             }
 
             try {
-                // Update each tile's blooming state
-                const updates = tiles.map(tile =>
-                    prisma.tile.updateMany({
-                        where: {
-                            plantId,
-                            x: tile.x,
-                            y: tile.y,
-                            isSeed: false
-                        },
-                        data: {
-                            blooming: tile.blooming ?? false
-                        }
-                    })
+                // Use transaction for batch update
+                await prisma.$transaction(
+                    tiles.map((tile) =>
+                        prisma.tile.updateMany({
+                            where: {
+                                plantId,
+                                x: tile.x,
+                                y: tile.y,
+                                isSeed: false,
+                            },
+                            data: {
+                                blooming: tile.blooming ?? false,
+                            },
+                        })
+                    )
                 );
 
-                await Promise.all(updates);
+                // Invalidate cache
+                invalidatePlantCache(plantId);
 
                 // Broadcast to other clients viewing this plant
                 socket.to(`plant:${plantId}`).emit('tiles:updated', { tiles });
@@ -311,19 +412,21 @@ function initializeSocket(io) {
                 // Broadcast to home gallery viewers
                 io.to('home:gallery').emit('plant:tiles:updated', {
                     username: plantUsername,
-                    tiles
+                    tiles,
                 });
 
                 socket.emit('tiles:update:ack', { success: true, count: tiles.length });
-
             } catch (err) {
-                console.error('Batch tile update error:', err);
+                logger.error('Batch tile update error:', err);
                 socket.emit('error', { message: 'Failed to update tiles' });
             }
         });
 
-        // Handle tile deletion (owner or admin)
         socket.on('delete', async (data) => {
+            if (!checkRateLimit(socket.id, 'delete', 20, 1000)) {
+                return;
+            }
+
             if (!canEdit) {
                 socket.emit('error', { message: 'Not authorized to edit this plant' });
                 return;
@@ -332,26 +435,32 @@ function initializeSocket(io) {
             const { x, y, disconnected = [] } = data;
 
             try {
-                // Delete the main tile (only if not a seed)
-                await prisma.tile.deleteMany({
-                    where: {
-                        plantId,
-                        x,
-                        y,
-                        isSeed: false
+                // Use transaction for atomic deletion
+                await prisma.$transaction(async (tx) => {
+                    // Delete the main tile (only if not a seed)
+                    await tx.tile.deleteMany({
+                        where: {
+                            plantId,
+                            x,
+                            y,
+                            isSeed: false,
+                        },
+                    });
+
+                    // Delete any disconnected tiles
+                    if (disconnected.length > 0) {
+                        await tx.tile.deleteMany({
+                            where: {
+                                plantId,
+                                OR: disconnected.map((pos) => ({ x: pos.x, y: pos.y })),
+                                isSeed: false,
+                            },
+                        });
                     }
                 });
 
-                // Delete any disconnected tiles
-                if (disconnected.length > 0) {
-                    await prisma.tile.deleteMany({
-                        where: {
-                            plantId,
-                            OR: disconnected.map(pos => ({ x: pos.x, y: pos.y })),
-                            isSeed: false
-                        }
-                    });
-                }
+                // Invalidate cache
+                invalidatePlantCache(plantId);
 
                 const deleteData = { x, y, disconnected };
 
@@ -361,20 +470,23 @@ function initializeSocket(io) {
                 // Broadcast to home gallery viewers
                 io.to('home:gallery').emit('plant:delete', {
                     username: plantUsername,
-                    ...deleteData
+                    ...deleteData,
                 });
 
                 // Acknowledge to sender
                 socket.emit('delete:ack', { x, y, success: true });
-
             } catch (err) {
-                console.error('Tile delete error:', err);
+                logger.error('Tile delete error:', err);
                 socket.emit('error', { message: 'Failed to delete tile' });
             }
         });
 
-        // Handle batch word sync (owner or admin)
         socket.on('words:sync', async (data) => {
+            if (!checkRateLimit(socket.id, 'words:sync', 5, 1000)) {
+                socket.emit('error', { message: 'Rate limited' });
+                return;
+            }
+
             if (!canEdit) {
                 socket.emit('error', { message: 'Not authorized to edit this plant' });
                 return;
@@ -385,59 +497,68 @@ function initializeSocket(io) {
             try {
                 // Normalize words to add
                 const wordsToAdd = (Array.isArray(add) ? add : [])
-                    .map(w => w.trim().toUpperCase())
-                    .filter(w => w.length >= 2);
+                    .map((w) => w.trim().toUpperCase())
+                    .filter((w) => w.length >= 2);
 
                 // Normalize words to remove
                 const wordsToRemove = (Array.isArray(remove) ? remove : [])
-                    .map(w => w.trim().toUpperCase())
-                    .filter(w => w.length >= 2);
+                    .map((w) => w.trim().toUpperCase())
+                    .filter((w) => w.length >= 2);
 
-                // Remove expanded words first
-                if (wordsToRemove.length > 0) {
-                    await prisma.plantWord.deleteMany({
-                        where: {
-                            plantId,
-                            word: { in: wordsToRemove }
-                        }
-                    });
-                }
+                // Use transaction for atomic word operations
+                await prisma.$transaction(async (tx) => {
+                    // Remove expanded words first
+                    if (wordsToRemove.length > 0) {
+                        await tx.plantWord.deleteMany({
+                            where: {
+                                plantId,
+                                word: { in: wordsToRemove },
+                            },
+                        });
+                    }
 
-                // Add new words
-                if (wordsToAdd.length > 0) {
-                    await prisma.plantWord.createMany({
-                        data: wordsToAdd.map(word => ({
-                            plantId,
-                            word
-                        })),
-                        skipDuplicates: true
-                    });
-                }
+                    // Add new words
+                    if (wordsToAdd.length > 0) {
+                        await tx.plantWord.createMany({
+                            data: wordsToAdd.map((word) => ({
+                                plantId,
+                                word,
+                            })),
+                            skipDuplicates: true,
+                        });
+                    }
+                });
 
                 // Acknowledge to sender
                 socket.emit('words:sync:ack', {
                     success: true,
                     added: wordsToAdd.length,
-                    removed: wordsToRemove.length
+                    removed: wordsToRemove.length,
                 });
 
                 // Broadcast changes to other clients
                 if (wordsToAdd.length > 0 || wordsToRemove.length > 0) {
                     socket.to(`plant:${plantId}`).emit('words:changed', {
                         added: wordsToAdd,
-                        removed: wordsToRemove
+                        removed: wordsToRemove,
                     });
                 }
-
             } catch (err) {
-                console.error('Words sync error:', err);
+                logger.error('Words sync error:', err);
                 socket.emit('error', { message: 'Failed to sync words' });
             }
         });
 
-        // Handle disconnect
         socket.on('disconnect', () => {
-            console.log(`Viewer disconnected from plant ${plantId}`);
+            logger.log(`Viewer disconnected from plant ${plantId}`);
+
+            // Clean up any pending tile updates for this socket
+            const queue = tileUpdateQueues.get(plantId);
+            if (queue && queue.timeout) {
+                clearTimeout(queue.timeout);
+                // Flush remaining tiles before disconnect
+                flushTileUpdates(plantId, io, plantUsername);
+            }
         });
     });
 }

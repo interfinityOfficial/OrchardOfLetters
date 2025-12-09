@@ -13,7 +13,23 @@ const { initializeSocket } = require('./socket');
 // Express app setup
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+
+// Socket.IO with performance optimizations
+const io = new Server(server, {
+    perMessageDeflate: {
+        threshold: 1024,
+        zlibDeflateOptions: { chunkSize: 1024 * 16 },
+        zlibInflateOptions: { chunkSize: 1024 * 16 },
+    },
+
+    pingTimeout: 60000,
+    pingInterval: 25000,
+
+    maxHttpBufferSize: 1e6,
+
+    transports: ['websocket', 'polling'],
+    allowUpgrades: true,
+});
 
 // View engine
 app.set('view engine', 'ejs');
