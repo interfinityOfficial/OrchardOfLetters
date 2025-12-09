@@ -169,6 +169,21 @@ let indexBuildInProgress = false;
 
 const MAX_WORD_USES = 1;
 let wordUsageCount = new Map();
+let wordUsageInitialized = false;
+
+// Initialize word usage from existing words on the grid
+function initWordUsageFromGrid() {
+    if (wordUsageInitialized) return;
+
+    wordUsageCount.clear();
+
+    // Use plantWords which already tracks all valid words on the grid
+    for (const word of plantWords) {
+        wordUsageCount.set(word, 1);
+    }
+
+    wordUsageInitialized = true;
+}
 
 let searchState = null;
 
@@ -248,6 +263,9 @@ function startGrowth() {
 
     if (!indexBuilt) return;
 
+    // Initialize word usage from existing grid words
+    initWordUsageFromGrid();
+
     isGrowing = true;
     scheduleNextStep(getSearchInterval());
 }
@@ -286,6 +304,7 @@ function stopGrowth() {
         growthTimeoutId = null;
     }
     wordUsageCount.clear();
+    wordUsageInitialized = false;
 }
 
 // Reschedule growth timing after tiles change
