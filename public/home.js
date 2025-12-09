@@ -79,7 +79,7 @@ function getExtraSignWidth(plant, cellSize) {
 function drawUsernameSign(username, signCenterX, groundY, cellSize) {
     const signFontSize = Math.floor(cellSize * 0.55);
     const postWidth = cellSize / 5;
-    const pinSize = Math.floor(cellSize / 12);
+    const pinSize = Math.floor(cellSize / 8);
     const signPadding = cellSize * 0.25;
 
     ctx.font = `normal ${signFontSize}px "Retro", monospace`;
