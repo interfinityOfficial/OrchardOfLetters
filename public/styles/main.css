@@ -380,7 +380,7 @@ input::placeholder {
   max-width: calc(
     100vw - var(--logo-cell-size) * 2.4 - var(--nav-button-cell-size) * 6
   );
-  max-height: calc(var(--nav-button-cell-size) * 7);
+  max-height: calc(var(--nav-button-cell-size) * 5);
 
   transition: opacity 0.3s ease-in-out;
 }
