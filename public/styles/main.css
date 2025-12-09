@@ -382,8 +382,6 @@ input::placeholder {
   );
   max-height: calc(var(--nav-button-cell-size) * 5);
   display: flex;
-  justify-content: center;
-  align-items: center;
 
   transition: opacity 0.3s ease-in-out;
 }
