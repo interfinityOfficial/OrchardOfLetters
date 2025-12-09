@@ -188,14 +188,7 @@ function drawPlant(layout) {
             const relY = tile.y - bounds.minY;
             const centerX = offsetX + relX * cellSize + cellSize / 2;
             const centerY = offsetY + relY * cellSize + cellSize / 2;
-            if (tile.letter.toUpperCase() === 'O' && appleImageLoaded) {
-                const appleX = offsetX + relX * cellSize + cellSize / 7 * 1.2;
-                const appleY = offsetY + relY * cellSize + cellSize / 7 * 1.2;
-                const appleSize = cellSize / 7 * 4.6;
-                ctx.drawImage(appleImage, appleX, appleY, appleSize, appleSize);
-            } else {
-                ctx.fillText(tile.letter, centerX, centerY + yOffset);
-            }
+            ctx.fillText(tile.letter, centerX, centerY + yOffset);
         }
     }
 

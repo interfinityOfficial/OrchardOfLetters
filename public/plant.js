@@ -448,19 +448,15 @@ function drawSeedInputScreen() {
         if (animLetter && opacity > 0.01) {
             ctx.globalAlpha = opacity * (isSelected && !isDisappearing ? 1 : 1);
             const textColor = (isSelected && !isDisappearing) ? COLORS.background : primaryColor;
-            if (animLetter.toUpperCase() === 'O' && appleImageLoaded) {
-                ctx.drawImage(appleImage, x + tileSize / 7 * 1.2, y + tileSize / 7 * 1.2, tileSize / 7 * 4.6, tileSize / 7 * 4.6);
-            } else {
-                ctx.font = `normal ${fontSize}px "Retro", monospace`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillStyle = textColor;
-                ctx.fillText(
-                    animLetter,
-                    x + tileSize / 2,
-                    y + tileSize / 2 + (isSafari ? 5.2 : 4.9)
-                );
-            }
+            ctx.font = `normal ${fontSize}px "Retro", monospace`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = textColor;
+            ctx.fillText(
+                animLetter,
+                x + tileSize / 2,
+                y + tileSize / 2 + (isSafari ? 5.2 : 4.9)
+            );
             ctx.globalAlpha = 1;
         }
     }
@@ -709,19 +705,15 @@ function drawSeedTransition() {
 
         const textColor = lerpColor(COLORS.blooming.primary, COLORS.seed, colorProgress);
 
-        if (letter.toUpperCase() === 'O' && appleImageLoaded) {
-            ctx.drawImage(appleImage, x + tileSize / 7 * 1.2, y + tileSize / 7 * 1.2, tileSize / 7 * 4.6, tileSize / 7 * 4.6);
-        } else {
-            ctx.font = 'normal 46px "Retro", monospace';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillStyle = textColor;
-            ctx.fillText(
-                letter,
-                x + tileSize / 2,
-                y + tileSize / 2 + (isSafari ? 5.2 : 4.9)
-            );
-        }
+        ctx.font = 'normal 46px "Retro", monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = textColor;
+        ctx.fillText(
+            letter,
+            x + tileSize / 2,
+            y + tileSize / 2 + (isSafari ? 5.2 : 4.9)
+        );
     }
 }
 
@@ -1677,7 +1669,7 @@ function drawCellContent(x, y) {
 
         ctx.globalAlpha = opacity * (isSelected && !isDisappearing ? 1 : (seed ? 1 : baseAlpha));
 
-        if (letter.toUpperCase() === 'O' && appleImageLoaded) {
+        if (letter.toUpperCase() === 'O' && appleImageLoaded && !seed) {
             ctx.drawImage(appleImage, screenPos.x + CELL_SIZE / 7 * 1.2, screenPos.y + CELL_SIZE / 7 * 1.2, CELL_SIZE / 7 * 4.6, CELL_SIZE / 7 * 4.6);
         } else {
             ctx.fillStyle = (isSelected && !isDisappearing) ? COLORS.background : primaryColor;
