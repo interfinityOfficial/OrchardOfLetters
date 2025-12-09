@@ -79,6 +79,7 @@ function getExtraSignWidth(plant, cellSize) {
 function drawUsernameSign(username, signCenterX, groundY, cellSize) {
     const signFontSize = Math.floor(cellSize * 0.55);
     const postWidth = cellSize / 5;
+    const pinSize = Math.floor(cellSize / 12);
     const signPadding = cellSize * 0.25;
 
     ctx.font = `normal ${signFontSize}px "Retro", monospace`;
@@ -103,10 +104,10 @@ function drawUsernameSign(username, signCenterX, groundY, cellSize) {
     ctx.fillRect(boardX, boardY, boardWidth, boardHeight);
 
     ctx.fillStyle = COLORS.withering;
-    ctx.fillRect(boardX + 4, boardY + 4, 4, 4);
-    ctx.fillRect(boardX + boardWidth - 8, boardY + 4, 4, 4);
-    ctx.fillRect(boardX + 4, boardY + boardHeight - 8, 4, 4);
-    ctx.fillRect(boardX + boardWidth - 8, boardY + boardHeight - 8, 4, 4);
+    ctx.fillRect(boardX + pinSize, boardY + pinSize, pinSize, pinSize);
+    ctx.fillRect(boardX + boardWidth - pinSize * 2, boardY + pinSize, pinSize, pinSize);
+    ctx.fillRect(boardX + pinSize, boardY + boardHeight - pinSize * 2, pinSize, pinSize);
+    ctx.fillRect(boardX + boardWidth - pinSize * 2, boardY + boardHeight - pinSize * 2, pinSize, pinSize);
 
     ctx.fillStyle = COLORS.background;
     ctx.textAlign = 'center';
