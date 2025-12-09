@@ -5,6 +5,7 @@ const COLORS = {
     blooming: '#36856B',
     withering: '#7C5F4C',
     sign: '#B0866A',
+    apple: '#FE5457',
 };
 
 // Load apple image for letter O
@@ -452,10 +453,12 @@ function drawMinimap() {
         const { bounds, tiles } = plant;
 
         for (const tile of tiles) {
-            const { x, y, isSeed, blooming } = tile;
+            const { x, y, letter, isSeed, blooming } = tile;
 
             if (isSeed) {
                 minimapCtx.fillStyle = COLORS.seed;
+            } else if (letter && letter.toUpperCase() === 'O') {
+                minimapCtx.fillStyle = COLORS.apple;
             } else if (blooming) {
                 minimapCtx.fillStyle = COLORS.blooming;
             } else {

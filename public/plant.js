@@ -321,6 +321,7 @@ const COLORS = {
     background: '#FFFFFF',
     secondary: '#EBEBEB',
     seed: "#124434",
+    apple: "#FE5457",
 
     blooming: {
         primary: '#36856B',
@@ -1510,10 +1511,12 @@ function drawMinimap() {
     ctx.strokeRect(MINIMAP_PADDING - 1.5, MINIMAP_PADDING - 1.5, MINIMAP_WIDTH + 3, MINIMAP_HEIGHT + 3);
 
     for (const cell of grid.values()) {
-        const { x, y, isSeed, blooming } = cell;
+        const { x, y, letter, isSeed, blooming } = cell;
 
         if (isSeed) {
             ctx.fillStyle = COLORS.seed;
+        } else if (letter && letter.toUpperCase() === 'O') {
+            ctx.fillStyle = COLORS.apple;
         } else if (blooming) {
             ctx.fillStyle = COLORS.blooming.primary;
         } else {
