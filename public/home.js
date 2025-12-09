@@ -7,6 +7,14 @@ const COLORS = {
     sign: '#B0866A',
 };
 
+// Load apple image for letter O
+const appleImage = new Image();
+appleImage.src = '/assets/apple.png';
+let appleImageLoaded = false;
+appleImage.onload = () => {
+    appleImageLoaded = true;
+};
+
 const MINIMAP_PIXEL_SIZE = 3;
 const MINIMAP_PADDING = 14.5;
 const MINIMAP_BORDER_WIDTH = 3;
@@ -180,7 +188,14 @@ function drawPlant(layout) {
             const relY = tile.y - bounds.minY;
             const centerX = offsetX + relX * cellSize + cellSize / 2;
             const centerY = offsetY + relY * cellSize + cellSize / 2;
-            ctx.fillText(tile.letter, centerX, centerY + yOffset);
+            if (tile.letter.toUpperCase() === 'O' && appleImageLoaded) {
+                const appleX = offsetX + relX * cellSize + cellSize / 7 * 1.2;
+                const appleY = offsetY + relY * cellSize + cellSize / 7 * 1.2;
+                const appleSize = cellSize / 7 * 4.6;
+                ctx.drawImage(appleImage, appleX, appleY, appleSize, appleSize);
+            } else {
+                ctx.fillText(tile.letter, centerX, centerY + yOffset);
+            }
         }
     }
 
@@ -192,7 +207,14 @@ function drawPlant(layout) {
             const relY = tile.y - bounds.minY;
             const centerX = offsetX + relX * cellSize + cellSize / 2;
             const centerY = offsetY + relY * cellSize + cellSize / 2;
-            ctx.fillText(tile.letter, centerX, centerY + yOffset);
+            if (tile.letter.toUpperCase() === 'O' && appleImageLoaded) {
+                const appleX = offsetX + relX * cellSize + cellSize / 7 * 1.2;
+                const appleY = offsetY + relY * cellSize + cellSize / 7 * 1.2;
+                const appleSize = cellSize / 7 * 4.6;
+                ctx.drawImage(appleImage, appleX, appleY, appleSize, appleSize);
+            } else {
+                ctx.fillText(tile.letter, centerX, centerY + yOffset);
+            }
         }
     }
 
@@ -204,7 +226,14 @@ function drawPlant(layout) {
             const relY = tile.y - bounds.minY;
             const centerX = offsetX + relX * cellSize + cellSize / 2;
             const centerY = offsetY + relY * cellSize + cellSize / 2;
-            ctx.fillText(tile.letter, centerX, centerY + yOffset);
+            if (tile.letter.toUpperCase() === 'O' && appleImageLoaded) {
+                const appleX = offsetX + relX * cellSize + cellSize / 7 * 1.2;
+                const appleY = offsetY + relY * cellSize + cellSize / 7 * 1.2;
+                const appleSize = cellSize / 7 * 4.6;
+                ctx.drawImage(appleImage, appleX, appleY, appleSize, appleSize);
+            } else {
+                ctx.fillText(tile.letter, centerX, centerY + yOffset);
+            }
         }
     }
 
