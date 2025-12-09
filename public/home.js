@@ -78,7 +78,7 @@ function getExtraSignWidth(plant, cellSize) {
 // Draw the username sign at a world position
 function drawUsernameSign(username, signCenterX, groundY, cellSize) {
     const signFontSize = Math.floor(cellSize * 0.55);
-    const postWidth = 10;
+    const postWidth = cellSize / 5;
     const signPadding = cellSize * 0.25;
 
     ctx.font = `normal ${signFontSize}px "Retro", monospace`;
