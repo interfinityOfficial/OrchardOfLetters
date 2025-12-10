@@ -384,7 +384,7 @@ function initMinimap() {
     minimapCtx = minimapCanvas.getContext('2d');
 
     minimapCanvas.addEventListener('click', handleMinimapClick);
-    minimapCanvas.addEventListener('mousedown', handleMinimapDrag);
+    // minimapCanvas.addEventListener('mousedown', handleMinimapDrag);
 
     updateMinimapSize();
 }
