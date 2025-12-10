@@ -15,7 +15,7 @@ const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 // Hidden input for mobile keyboard support
 const hiddenInput = document.getElementById('hidden-keyboard-input');
 
-// Focus hidden input to trigger mobile keyboard (touch devices only)
+// Focus hidden input to trigger mobile keyboard
 function focusHiddenInput() {
     if (!isTouchDevice || !hiddenInput) return;
     hiddenInput.value = '';
@@ -36,7 +36,6 @@ if (isTouchDevice && hiddenInput) {
         if (value && value.length > 0) {
             const letter = value[value.length - 1];
             if (letter.match(/[a-zA-Z]/)) {
-                // Dispatch a synthetic keydown event
                 const syntheticEvent = new KeyboardEvent('keydown', {
                     key: letter,
                     bubbles: true,
@@ -48,10 +47,8 @@ if (isTouchDevice && hiddenInput) {
         }
     });
 
-    // Handle backspace and enter via keydown on the hidden input
     hiddenInput.addEventListener('keydown', (e) => {
         if (e.key === 'Backspace' || e.key === 'Enter') {
-            // Dispatch to document for existing handlers
             const syntheticEvent = new KeyboardEvent('keydown', {
                 key: e.key,
                 bubbles: true,
