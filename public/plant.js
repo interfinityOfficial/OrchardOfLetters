@@ -2093,6 +2093,17 @@ async function init() {
     onSocketEvent('connected', (data) => {
     });
 
+    // Restart growth when reconnected after disconnect
+    onSocketEvent('connect', () => {
+        if (window.growthPausedByDisconnect && window.PLANT_DATA?.isOwner && !seedInputMode) {
+            console.log('WebSocket reconnected, resuming growth');
+            window.growthPausedByDisconnect = false;
+            if (typeof startGrowth === 'function') {
+                startGrowth();
+            }
+        }
+    });
+
     onSocketEvent('seedSet', (data) => {
         transitionToTreeMode(data);
     });

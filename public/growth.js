@@ -353,6 +353,14 @@ function canUseWord(word) {
 function growStep(deadline) {
     if (!isGrowing || !indexBuilt) return;
 
+    // Stop growth if websocket is disconnected
+    if (typeof window.isSocketConnected === 'function' && !window.isSocketConnected()) {
+        console.log('WebSocket disconnected, pausing growth');
+        stopGrowth();
+        window.growthPausedByDisconnect = true;
+        return;
+    }
+
     const startTime = performance.now();
 
     if (currentTarget) {

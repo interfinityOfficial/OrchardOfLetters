@@ -211,6 +211,9 @@ function isSocketConnected() {
     return isConnected;
 }
 
+// Expose connection status globally
+window.isSocketConnected = isSocketConnected;
+
 // Register a callback for a socket event name
 function onSocketEvent(event, callback) {
     switch (event) {
