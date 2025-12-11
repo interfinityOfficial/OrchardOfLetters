@@ -102,6 +102,33 @@ router.get('/privacy/', async (req, res) => {
     });
 });
 
+router.post('/reset/', async (req, res) => {
+    const userId = req.session.userId;
+
+    const user = await prisma.user.findUnique({
+        where: { id: userId }
+    });
+
+    if (!user || !user.isAdmin) {
+        return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    const { plantId } = req.body;
+    await prisma.plant.update({
+        where: { id: plantId },
+        data: {
+            seed: null,
+            tiles: {
+                deleteMany: {}
+            },
+            words: {
+                deleteMany: {}
+            }
+        }
+    });
+    res.json({ success: true });
+});
+
 // Plant page - user's own plant (edit mode)
 router.get('/plant/', async (req, res) => {
     // Require authentication
@@ -117,7 +144,7 @@ router.get('/plant/', async (req, res) => {
         include: {
             tiles: true,
             words: true,
-            user: { select: { username: true } }
+            user: { select: { username: true, isAdmin: true } }
         }
     });
 
@@ -130,7 +157,7 @@ router.get('/plant/', async (req, res) => {
             include: {
                 tiles: true,
                 words: true,
-                user: { select: { username: true } }
+                user: { select: { username: true, isAdmin: true } }
             }
         });
     }
@@ -152,6 +179,7 @@ router.get('/plant/', async (req, res) => {
         plantId: plant.id,
         username: plant.user.username,
         isOwner: true,
+        isAdmin: plant.user.isAdmin,
         canEdit: true,  // Owner can always edit
         seed: plant.seed || '',
         tiles: JSON.stringify(tiles),
@@ -222,6 +250,7 @@ router.get('/plant/:username/', async (req, res) => {
         plantId: plant.id,
         username: username,
         isOwner: false,
+        isAdmin: isAdmin,  // Show reset button for admins
         canEdit: isAdmin,  // Admins can edit any plant
         seed: plant.seed,
         tiles: JSON.stringify(tiles),

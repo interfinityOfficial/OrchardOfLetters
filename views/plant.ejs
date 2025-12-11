@@ -64,7 +64,15 @@
         <div class="nav-button-letter">R</div>
         <div class="nav-button-letter">D</div>
       </a>
-      <% if (userId) { %>
+      <% if (isAdmin) { %>
+      <button class="nav-button" id="reset-button">
+        <div class="nav-button-letter">R</div>
+        <div class="nav-button-letter">E</div>
+        <div class="nav-button-letter">S</div>
+        <div class="nav-button-letter">E</div>
+        <div class="nav-button-letter">T</div>
+      </button>
+      <% } %> <% if (userId) { %>
       <button class="nav-button" id="logout-button">
         <div class="nav-button-letter">L</div>
         <div class="nav-button-letter">O</div>
@@ -75,9 +83,9 @@
       </button>
       <% } %>
     </div>
-    <div class="alert">
+    <div class="alert" id="alert">
       <div class="alert-content">
-        <p>Confirm Logout?</p>
+        <p id="alert-content-text">Confirm Logout?</p>
       </div>
       <div class="alert-buttons">
         <button
