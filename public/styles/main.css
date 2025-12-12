@@ -377,11 +377,6 @@ input::placeholder {
   cursor: pointer;
   z-index: 1000;
   opacity: 0.3;
-  width: var(--minimap-width);
-  max-width: calc(
-    100vw - var(--logo-cell-size) * 2.4 - var(--nav-button-cell-size) * 6
-  );
-  /* max-height: calc(var(--nav-button-cell-size) * 5); */
   display: flex;
 
   transition: opacity 0.3s ease-in-out;
@@ -392,8 +387,12 @@ input::placeholder {
 }
 
 #minimap canvas {
-  width: 100%;
-  object-fit: contain;
+  width: var(--minimap-width);
+  height: var(--minimap-height);
+  max-width: calc(
+    100vw - var(--logo-cell-size) * 2.4 - var(--nav-button-cell-size) * 6
+  );
+  max-height: calc(var(--nav-button-cell-size) * 5);
 }
 
 body.page-about,
