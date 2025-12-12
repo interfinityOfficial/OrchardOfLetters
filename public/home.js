@@ -404,8 +404,8 @@ function updateMinimapSize() {
 
     minimapCanvas.width = minimapWidth * dpr;
     minimapCanvas.height = minimapHeight * dpr;
-    document.documentElement.style.setProperty('--minimap-width', `${minimapWidth}px`);
-    document.documentElement.style.setProperty('--minimap-height', `${minimapHeight}px`);
+    document.getElementById('minimap').style.setProperty('--minimap-width', `${minimapWidth}px`);
+    document.getElementById('minimap').style.setProperty('--minimap-height', `${minimapHeight}px`);
 
     minimapCtx.setTransform(1, 0, 0, 1, 0, 0);
     minimapCtx.scale(dpr, dpr);
@@ -469,8 +469,8 @@ function drawMinimap() {
     const viewportX = (-camera.x) * scale;
     const viewportW = innerWidth * scale;
 
-    document.documentElement.style.setProperty('--minimap-viewport-left', `${viewportX / minimapWidth * 100}%`);
-    document.documentElement.style.setProperty('--minimap-viewport-width', `${viewportW / minimapWidth * 100}%`);
+    document.getElementById('minimap').style.setProperty('--minimap-viewport-left', `${viewportX / minimapWidth * 100}%`);
+    document.getElementById('minimap').style.setProperty('--minimap-viewport-width', `${viewportW / minimapWidth * 100}%`);
 }
 
 // Pan camera to the clicked minimap position
