@@ -493,6 +493,8 @@ function drawMinimap() {
         viewportW + viewportLineWidth,
         minimapHeight - innerPadding * 2 + viewportLineWidth
     );
+    document.documentElement.style.setProperty('--minimap-viewport-left', `${viewportX / minimapWidth * 100}%`);
+    document.documentElement.style.setProperty('--minimap-viewport-width', `${viewportW / minimapWidth * 100}%`);
 }
 
 // Pan camera to the clicked minimap position

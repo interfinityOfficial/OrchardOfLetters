@@ -391,6 +391,17 @@ input::placeholder {
   opacity: 1;
 }
 
+#minimap::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: var(--minimap-viewport-left);
+  width: var(--minimap-viewport-width);
+  height: 100%;
+
+  outline: 3px solid #2c8e6d;
+}
+
 #minimap canvas {
   width: 100%;
   object-fit: contain;
