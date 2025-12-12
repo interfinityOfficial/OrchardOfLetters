@@ -407,6 +407,7 @@ function updateMinimapSize() {
     minimapCanvas.width = minimapWidth * dpr;
     minimapCanvas.height = minimapHeight * dpr;
     document.documentElement.style.setProperty('--minimap-width', `${minimapWidth}px`);
+    document.documentElement.style.setProperty('--minimap-height', `${minimapHeight}px`);
 
     minimapCtx.setTransform(1, 0, 0, 1, 0, 0);
     minimapCtx.scale(dpr, dpr);
