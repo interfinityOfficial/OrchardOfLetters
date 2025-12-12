@@ -435,14 +435,14 @@ function drawMinimap() {
     minimapCtx.fillStyle = 'rgba(255, 255, 255, 0.9)';
     minimapCtx.fillRect(0, 0, minimapWidth, minimapHeight);
 
-    minimapCtx.strokeStyle = COLORS.secondary;
-    minimapCtx.lineWidth = MINIMAP_BORDER_WIDTH;
-    minimapCtx.strokeRect(
-        MINIMAP_BORDER_WIDTH / 2,
-        MINIMAP_BORDER_WIDTH / 2,
-        minimapWidth - MINIMAP_BORDER_WIDTH,
-        minimapHeight - MINIMAP_BORDER_WIDTH
-    );
+    // minimapCtx.strokeStyle = COLORS.secondary;
+    // minimapCtx.lineWidth = MINIMAP_BORDER_WIDTH;
+    // minimapCtx.strokeRect(
+    //     MINIMAP_BORDER_WIDTH / 2,
+    //     MINIMAP_BORDER_WIDTH / 2,
+    //     minimapWidth - MINIMAP_BORDER_WIDTH,
+    //     minimapHeight - MINIMAP_BORDER_WIDTH
+    // );
 
     const innerPadding = MINIMAP_BORDER_WIDTH;
 
@@ -485,14 +485,14 @@ function drawMinimap() {
     const viewportLineWidth = 3;
     const halfLine = viewportLineWidth / 2;
 
-    minimapCtx.strokeStyle = '#000000';
-    minimapCtx.lineWidth = viewportLineWidth;
-    minimapCtx.strokeRect(
-        viewportX - halfLine,
-        innerPadding - halfLine,
-        viewportW + viewportLineWidth,
-        minimapHeight - innerPadding * 2 + viewportLineWidth
-    );
+    // minimapCtx.strokeStyle = '#000000';
+    // minimapCtx.lineWidth = viewportLineWidth;
+    // minimapCtx.strokeRect(
+    //     viewportX - halfLine,
+    //     innerPadding - halfLine,
+    //     viewportW + viewportLineWidth,
+    //     minimapHeight - innerPadding * 2 + viewportLineWidth
+    // );
     document.documentElement.style.setProperty('--minimap-viewport-left', `${viewportX / minimapWidth * 100}%`);
     document.documentElement.style.setProperty('--minimap-viewport-width', `${viewportW / minimapWidth * 100}%`);
 }

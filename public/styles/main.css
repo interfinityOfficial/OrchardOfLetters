@@ -397,14 +397,15 @@ input::placeholder {
   top: 0;
   left: var(--minimap-viewport-left);
   width: var(--minimap-viewport-width);
-  height: 100%;
+  height: calc(100% - 6px);
 
-  outline: 3px solid #2c8e6d;
+  outline: 3px solid #000000;
 }
 
 #minimap canvas {
   width: 100%;
   object-fit: contain;
+  outline: 3px solid #ebebeb;
 }
 
 body.page-about,
