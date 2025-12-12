@@ -393,6 +393,7 @@ input::placeholder {
     100vw - var(--logo-cell-size) * 2.4 - var(--nav-button-cell-size) * 6
   );
   max-height: calc(var(--nav-button-cell-size) * 5);
+  aspect-ratio: calc(var(--minimap-width) / var(--minimap-height));
 }
 
 body.page-about,
