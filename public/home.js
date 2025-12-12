@@ -444,7 +444,8 @@ function drawMinimap() {
     //     minimapHeight - MINIMAP_BORDER_WIDTH
     // );
 
-    const innerPadding = MINIMAP_BORDER_WIDTH;
+    // const innerPadding = MINIMAP_BORDER_WIDTH;
+    const innerPadding = 0;
 
     for (let i = 0; i < minimapPlantOffsets.length; i++) {
         const { username, offsetX } = minimapPlantOffsets[i];
