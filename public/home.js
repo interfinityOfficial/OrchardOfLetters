@@ -17,8 +17,6 @@ appleImage.onload = () => {
 };
 
 const MINIMAP_PIXEL_SIZE = 3;
-const MINIMAP_PADDING = 14.5;
-const MINIMAP_BORDER_WIDTH = 3;
 
 const MAX_CELL_SIZE = 52;
 const GRID_HEIGHT = 49;
@@ -394,7 +392,7 @@ function updateMinimapSize() {
     if (!minimapCanvas) return;
 
     const dpr = window.devicePixelRatio || 1;
-    const minimapHeight = maxBoundsHeight * MINIMAP_PIXEL_SIZE + MINIMAP_BORDER_WIDTH * 2;
+    const minimapHeight = maxBoundsHeight * MINIMAP_PIXEL_SIZE;
 
     let totalMinimapWidth = 0;
     for (const offset of minimapPlantOffsets) {
@@ -402,7 +400,7 @@ function updateMinimapSize() {
     }
     totalMinimapWidth += 2 * MINIMAP_PIXEL_SIZE;
 
-    const minimapWidth = totalMinimapWidth + MINIMAP_BORDER_WIDTH * 2;
+    const minimapWidth = totalMinimapWidth;
 
     minimapCanvas.width = minimapWidth * dpr;
     minimapCanvas.height = minimapHeight * dpr;
@@ -435,18 +433,6 @@ function drawMinimap() {
     minimapCtx.fillStyle = 'rgba(255, 255, 255, 0.9)';
     minimapCtx.fillRect(0, 0, minimapWidth, minimapHeight);
 
-    // minimapCtx.strokeStyle = COLORS.secondary;
-    // minimapCtx.lineWidth = MINIMAP_BORDER_WIDTH;
-    // minimapCtx.strokeRect(
-    //     MINIMAP_BORDER_WIDTH / 2,
-    //     MINIMAP_BORDER_WIDTH / 2,
-    //     minimapWidth - MINIMAP_BORDER_WIDTH,
-    //     minimapHeight - MINIMAP_BORDER_WIDTH
-    // );
-
-    // const innerPadding = MINIMAP_BORDER_WIDTH;
-    const innerPadding = 0;
-
     for (let i = 0; i < minimapPlantOffsets.length; i++) {
         const { username, offsetX } = minimapPlantOffsets[i];
         const plant = plantsByUsername.get(username);
@@ -471,29 +457,18 @@ function drawMinimap() {
             const relY = y - bounds.minY;
             const verticalOffset = (maxBoundsHeight - bounds.height) * MINIMAP_PIXEL_SIZE;
 
-            const pixelX = innerPadding + offsetX + relX * MINIMAP_PIXEL_SIZE;
-            const pixelY = innerPadding + verticalOffset + relY * MINIMAP_PIXEL_SIZE;
+            const pixelX = offsetX + relX * MINIMAP_PIXEL_SIZE;
+            const pixelY = verticalOffset + relY * MINIMAP_PIXEL_SIZE;
 
             minimapCtx.fillRect(pixelX, pixelY, MINIMAP_PIXEL_SIZE, MINIMAP_PIXEL_SIZE);
         }
     }
 
+    // Update CSS variables for viewport indicator (drawn via CSS)
     const scale = totalMinimapContentWidth / totalWorldWidth;
-
-    const viewportX = innerPadding + (-camera.x) * scale;
+    const viewportX = (-camera.x) * scale;
     const viewportW = innerWidth * scale;
 
-    const viewportLineWidth = 3;
-    const halfLine = viewportLineWidth / 2;
-
-    // minimapCtx.strokeStyle = '#000000';
-    // minimapCtx.lineWidth = viewportLineWidth;
-    // minimapCtx.strokeRect(
-    //     viewportX - halfLine,
-    //     innerPadding - halfLine,
-    //     viewportW + viewportLineWidth,
-    //     minimapHeight - innerPadding * 2 + viewportLineWidth
-    // );
     document.documentElement.style.setProperty('--minimap-viewport-left', `${viewportX / minimapWidth * 100}%`);
     document.documentElement.style.setProperty('--minimap-viewport-width', `${viewportW / minimapWidth * 100}%`);
 }
@@ -510,10 +485,9 @@ function handleMinimapClick(e) {
     const clickX = (e.clientX - rect.left) / cssScale;
     const { innerWidth } = window;
 
-    const innerPadding = MINIMAP_BORDER_WIDTH;
     const scale = totalMinimapContentWidth / totalWorldWidth;
 
-    const targetWorldX = (clickX - innerPadding) / scale;
+    const targetWorldX = clickX / scale;
     const targetCameraX = -(targetWorldX - innerWidth / 2);
 
     const maxX = 0;
